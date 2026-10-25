@@ -765,3 +765,23 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 700; }
   .reveal-on .reveal { opacity: 1 !important; transform: none !important; }
   .qo-tabs-indicator { display: none !important; }
 }
+
+/* Pickup time select (order form) and table booking form (Find us section) */
+.qo-field select { width: 100%; min-height: 50px; border: 1px solid var(--line); border-radius: 13px; padding: 12px 14px; color: var(--char); background: #fffdf7; font: inherit; }
+.qo-field select:focus { outline: 3px solid rgba(173,59,39,.18); border-color: var(--red); }
+.res-wrap { display: grid; gap: 16px; margin-bottom: 14px; }
+.res-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.res-field { display: grid; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: rgba(255,243,217,.82); }
+.res-field em { font-style: normal; font-weight: 400; opacity: .75; }
+.res-field input, .res-field select { width: 100%; min-height: 46px; border: 1px solid rgba(255,243,217,.22); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 15px; font-weight: 400; letter-spacing: 0; color: var(--char); background: #fffdf7; }
+.res-field input:focus, .res-field select:focus { outline: 3px solid rgba(240,165,143,.45); border-color: #f0a58f; }
+.res-wide { grid-column: 1 / -1; }
+.res-form .reservation-cta { justify-self: start; }
+.res-error { grid-column: 1 / -1; margin: 0 !important; color: #ffd0c2 !important; font-weight: 700; }
+.res-call { display: inline-flex; align-items: center; gap: 6px; color: var(--flour); margin-top: 4px; }
+.res-mine { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.res-mine li { display: grid; gap: 3px; padding: 12px 14px; border-radius: 14px; background: rgba(255,243,217,.08); border: 1px solid rgba(255,243,217,.18); color: var(--flour); font-size: 14px; }
+.res-mine li span { color: #e6cdb8; display: inline-flex; align-items: center; gap: 6px; }
+.res-mine li.res-confirmed { border-color: rgba(156,214,163,.6); background: rgba(156,214,163,.12); }
+.res-mine li.res-declined { border-color: rgba(240,165,143,.6); }
+@media (max-width: 640px) { .res-form { grid-template-columns: 1fr 1fr; } .res-field:nth-child(4), .res-field:nth-child(5) { grid-column: 1 / -1; } }

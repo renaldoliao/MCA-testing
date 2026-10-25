@@ -10,6 +10,8 @@ import { RouteAccessibility } from './components/route-accessibility';
 import { useStatus } from './lib/hours';
 import { useReveal } from './lib/reveal';
 import { useLiveMenu } from './lib/menuState';
+import ReservationForm from './ReservationForm';
+import { track, trackCallTaps } from './lib/track';
 import './motion.css';
 
 const MAP_URL = 'https://www.google.com/maps/search/?api=1&query=Miss+Chang+An+5071+Rochester+Rd+Troy+MI+48085';
@@ -218,7 +220,7 @@ function Home() {
       <div className="how-row reveal"><h3>Delivery</h3><p>Ask when you call, or check our online ordering page for what is available to your address.</p><a href={PHONE} className="text-link dark" data-testid="link-how-delivery">Call (313) 825-7757</a></div>
     </div></section>
      <section className="visit" id="visit" aria-labelledby="visit-heading"><div className="wrap visit-grid"><div><span className="eyebrow">Find us</span><h2 id="visit-heading">Come<br /><span>hungry.</span></h2><OpenBadge tone="dark" /><p className="visit-address">{ADDRESS}</p><div className="visit-links"><a href={PHONE} data-testid="link-visit-phone">(313) 825-7757 <ArrowUpRight size={16} aria-hidden="true" /></a><a href={MAP_URL} target="_blank" rel="noopener noreferrer" data-testid="link-visit-directions">Directions <ArrowUpRight size={16} aria-hidden="true" /></a></div><p className="visit-note"><strong>Dine in, pickup, delivery</strong><br />Order at the counter or on the screen by the door. Soup dumplings are made when you order.</p>
-       <aside className="reservation-card" id="reservations" aria-labelledby="reservation-heading"><span className="eyebrow">Reservations</span><h3 id="reservation-heading">Make an evening of it.</h3><p>Call our team to ask about table availability and make arrangements directly.</p><a className="button button-light reservation-cta" href={PHONE} data-testid="link-reservation-call"><CalendarDays size={17} aria-hidden="true" />Call to reserve <ArrowRight size={17} aria-hidden="true" /></a><span className="reservation-note">Tue–Sun · 11:30 am–9:00 pm</span></aside>
+       <aside className="reservation-card" id="reservations" aria-labelledby="reservation-heading"><span className="eyebrow">Reservations</span><h3 id="reservation-heading">Make an evening of it.</h3><p>Request a table below and we'll confirm it right here, or call our team.</p><ReservationForm /><a className="text-link res-call" href={PHONE} data-testid="link-reservation-call">Or call (313) 825-7757 <ArrowRight size={15} aria-hidden="true" /></a><span className="reservation-note">Tue–Sun · 11:30 am–9:00 pm</span></aside>
       </div></div></section>
   </>;
 }
@@ -232,7 +234,7 @@ function MenuPage() {
   const shown = useMemo(() => live.map(category => ({
     ...category,
     items: category.items.filter(item => (!spicy || item.spice) && (!q || `${item.name} ${item.chinese ?? ''} ${item.description ?? ''}`.toLowerCase().includes(q))),
-  })).filter(category => category.items.length > 0), [q, spicy]);
+  })).filter(category => category.items.length > 0), [live, q, spicy]);
   const total = shown.reduce((sum, category) => sum + category.items.length, 0);
   useReveal(`menu-${q}-${spicy}`);
   useEffect(() => {
@@ -250,7 +252,7 @@ function MenuPage() {
     <div className="wrap menu-tools"><label className="menu-search"><Search size={18} aria-hidden="true" /><span className="sr-only">Search the menu</span><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search noodles, lamb, dumplings" data-testid="input-menu-search" /></label><button type="button" className={`chip ${spicy ? 'on' : ''}`} aria-pressed={spicy} onClick={() => setSpicy(value => !value)} data-testid="button-filter-spicy">Spicy only</button><span className="menu-count" aria-live="polite">{total} {total === 1 ? 'dish' : 'dishes'}</span></div>
     <div className="wrap menu-layout"><aside className="menu-sidebar" aria-label="Menu categories"><span className="eyebrow">Jump to</span><div>{categories.map(category => <a key={category.id} href={`#${category.id}`} className={active === category.id ? 'active' : ''} aria-current={active === category.id ? 'true' : undefined} data-testid={`link-category-${category.id}`}>{category.title}</a>)}</div></aside><div>
       {total === 0 && <div className="menu-empty"><p>Nothing matches "{query}".</p><button type="button" className="text-link dark" onClick={() => { setQuery(''); setSpicy(false); }}>Clear filters</button></div>}
-      {shown.map(category => <section className="menu-section" id={category.id} key={category.id} aria-labelledby={`heading-${category.id}`}><div className="menu-section-heading"><span className="brush" aria-hidden="true">{category.character}</span><h2 id={`heading-${category.id}`}>{category.title}</h2></div>{category.items.map((item, index) => <article className={`menu-item reveal ${item.soldOut ? 'sold' : ''}`} key={`${category.id}-${item.name}`} data-testid={`menu-item-${category.id}-${index}`}><div className="menu-item-body"><h3 className="menu-item-name">{item.name}{item.chinese && <span className="brush" lang="zh">{item.chinese}</span>}{item.spice && <span className="spice">{item.spice}</span>}{item.isNew && <span className="new-tag">New</span>}</h3>{item.description && <p>{item.description}</p>}{thumbs[item.name] && <img className="menu-thumb" src={`${import.meta.env.BASE_URL}images/${thumbs[item.name]}`} alt={item.name} loading="lazy" decoding="async" />}</div><span className="menu-price" data-testid={`text-price-${category.id}-${index}`}>{item.soldOut ? 'Sold out today' : item.price}</span></article>)}</section>)}
+      {shown.map(category => <section className="menu-section" id={category.id} key={category.id} aria-labelledby={`heading-${category.id}`}><div className="menu-section-heading"><span className="brush" aria-hidden="true">{category.character}</span><h2 id={`heading-${category.id}`}>{category.title}</h2></div>{category.items.map((item, index) => <article className={`menu-item reveal ${item.soldOut ? 'sold' : ''}`} key={`${category.id}-${item.name}`} data-testid={`menu-item-${category.id}-${index}`}><div className="menu-item-body"><h3 className="menu-item-name">{item.name}{item.chinese && <span className="brush" lang="zh">{item.chinese}</span>}{item.spice && <span className="spice">{item.spice}</span>}{item.isNew && <span className="new-tag">New</span>}</h3>{item.description && <p>{item.description}</p>}{(item.photo || thumbs[item.name]) && <img className="menu-thumb" src={item.photo || `${import.meta.env.BASE_URL}images/${thumbs[item.name]}`} alt={item.name} loading="lazy" decoding="async" />}</div><span className="menu-price" data-testid={`text-price-${category.id}-${index}`}>{item.soldOut ? 'Sold out today' : item.price}</span></article>)}</section>)}
       <div className="menu-notice"><strong>Key</strong> SP: spicy. SP2 to SP5: spice level out of 5. Tell us about allergies when you order. The kitchen uses wheat, soy, sesame, peanuts, egg and shellfish.</div>
        <div className="menu-cta"><Link href="/#order-here" className="button button-red" data-testid="link-menu-order">Build a pickup order <ArrowRight size={18} aria-hidden="true" /></Link></div>
     </div></div>
@@ -281,6 +283,8 @@ function DashboardRedirect() {
 function App() {
   const live = useLiveMenu(categories);
   const [location] = useLocation();
+  useEffect(() => { track('view', location); }, [location]);
+  useEffect(() => trackCallTaps(), []);
   return <><a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-[#f7efe2] focus:p-4" data-testid="link-skip-content">Skip to content</a><Header /><main id="main-content" tabIndex={-1}><div className="route-transition" key={location}><Switch><Route path="/" component={Home} /><Route path="/menu" component={MenuPage} /><Route path="/order"><PageMeta title="Order Pickup Preview | Miss Chang An" description="Build and review a Miss Chang An pickup order in our in-house ordering prototype." /><OrderPage categories={live} /></Route><Route path="/dashboard" component={DashboardRedirect} /><Route path="/privacy">{() => <LegalPage type="privacy" />}</Route><Route path="/terms">{() => <LegalPage type="terms" />}</Route><Route component={NotFound} /></Switch></div></main><Footer /><ChatWidget categories={live} phone={PHONE} instagram={INSTAGRAM_URL} mapUrl={MAP_URL} address={ADDRESS} /><RouteAccessibility /></>;
 }
 

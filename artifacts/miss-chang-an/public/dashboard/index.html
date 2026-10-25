@@ -875,7 +875,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       tabMenu: "Menu", menuSync: "Menu edits are saved in this browser only; they do not publish for other customers. Photo edits are temporary previews.", menuTitle: "Your menu", menuOn: "dishes on your website", menuAvail: "available", menuOut: "sold out", menuSoldNow: "Sold out right now", menuAllOk: "Everything is available. Switch a dish off when you run out.", menuPutBack: "Put back", menuNoPhoto: n => `${n} dishes have no photo yet. Photo previews are not published.`, menuAdd: "Add a new dish", menuSee: "See your website", menuFind: "Find a dish", menuAll: "All", menuOnMenu: "On the menu", menuSold: "Sold out", menuPhoto: "Preview photo", menuNone: "No dishes match.",
       mNew: "New dish", mName: "Dish name", mZh: "Chinese name (optional)", mPrice: "Price", mCat: "Category", mCancel: "Cancel", mSave: "Add dish", menuAdded: n => `Added <b>${n}</b> to your menu`, menuOffToast: n => `<b>${n}</b> is sold out on your website`, menuOnToast: n => `<b>${n}</b> is back on your website`,
       cats: { "xian-specials": "Xi'an specials", noodles: "Hand-made noodles", "small-plates": "Small plates", "dim-sum": "Dim sum and snacks", drinks: "Tea, boba and drinks" },
-      sample: "DEMO · Sample orders and metrics",
+      sample: "DEMO · Sample orders and metrics", sampleReal: "LIVE · Real website orders and bookings",
       kOrders: "Orders today", kSales: "Sales today", kWaiting: "Not picked up yet",
       kOrdersNote: (p, d) => `<b>${p}</b> pickup · <b>${d}</b> delivery`, kSalesNote: n => `${n} average order`, kWaitNote: n => n ? "ready or on the way" : "all caught up",
       newOrder: (name, type, s) => `New ${type.toLowerCase()} order from ${name} · <b>${s}</b>`,
@@ -895,6 +895,13 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       sVisits: "Visits this week", sOrder: "Order preview taps", sCall: "Call taps",
       vVisits: "sample figures", vOrder: "opened the pickup preview; no order is sent", vCall: "sample figures",
       live: "Live", soon: "Next step",
+      realChecks: [
+        ["Pickup orders", "Customers choose dishes and a pickup time; orders arrive on the Orders tab within seconds."],
+        ["Table bookings", "Guests request a table on the website; confirm or decline it on the Reservations tab and they see the answer."],
+        ["Live chat", "Questions from the website arrive on the Chat tab, and your replies show up for the customer."],
+        ["Menu changes", "Sold out, new dishes and photos you set on the Menu tab show on the website for everyone."],
+        ["Real numbers", "Sales, totals and these visit counts come from real website activity."]
+      ],
       checks: [
         ["Pickup order preview", "Customers can build a draft, but it is not sent to this dashboard or the kitchen and no payment is taken."],
         ["Reservations by phone", "The website links customers to call; online booking is not connected."],
@@ -934,7 +941,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       tabMenu: "菜单", menuSync: "菜单修改只保存在当前浏览器，不会发布给其他顾客。照片修改只是临时预览。", menuTitle: "您的菜单", menuOn: "道菜在网站上", menuAvail: "可点", menuOut: "已售完", menuSoldNow: "现在售完的菜", menuAllOk: "全部都能点。卖完了就把那道菜关掉。", menuPutBack: "恢复", menuNoPhoto: n => `还有 ${n} 道菜没有照片。照片预览不会发布。`, menuAdd: "添加新菜", menuSee: "查看网站", menuFind: "搜索菜名", menuAll: "全部", menuOnMenu: "在菜单上", menuSold: "已售完", menuPhoto: "预览照片", menuNone: "没有找到。",
       mNew: "新菜品", mName: "英文菜名", mZh: "中文菜名（选填）", mPrice: "价格", mCat: "分类", mCancel: "取消", mSave: "添加", menuAdded: n => `已添加 <b>${n}</b>`, menuOffToast: n => `<b>${n}</b> 在网站上已售完`, menuOnToast: n => `<b>${n}</b> 已恢复`,
       cats: { "xian-specials": "西安特色", noodles: "手工面", "small-plates": "小菜", "dim-sum": "点心和小吃", drinks: "茶、奶茶和饮品" },
-      sample: "演示 · 示例订单和数据",
+      sample: "演示 · 示例订单和数据", sampleReal: "实时 · 真实网站订单和订座",
       kOrders: "今天订单", kSales: "今天营业额", kWaiting: "还没取走",
       kOrdersNote: (p, d) => `自取 <b>${p}</b> · 外送 <b>${d}</b>`, kSalesNote: n => `客单价 ${n}`, kWaitNote: n => n ? "已做好或在路上" : "都处理完了",
       newOrder: (name, type, s) => `新${type}订单，${name} · <b>${s}</b>`,
@@ -954,6 +961,13 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       sVisits: "本周访问", sOrder: "点餐预览点击", sCall: "电话点击",
       vVisits: "示例数据", vOrder: "打开自取预览；不会提交订单", vCall: "示例数据",
       live: "已上线", soon: "下一步",
+      realChecks: [
+        ["自取订单", "顾客选菜和取餐时间，订单几秒内出现在订单页。"],
+        ["订座", "顾客在网站申请订座；在预约页确认或拒绝，顾客会看到结果。"],
+        ["在线聊天", "网站上的问题出现在聊天页，你的回复会显示给顾客。"],
+        ["菜单更改", "在菜单页设置的售罄、新菜和照片，所有顾客都能在网站上看到。"],
+        ["真实数据", "营业额、总数和访问次数都来自真实的网站活动。"]
+      ],
       checks: [
         ["自取点餐预览", "顾客可以建立草稿，但不会发送到本后台或厨房，也不会收款。"],
         ["电话预约", "网站提供电话联系；尚未连接在线预约。"],
@@ -991,6 +1005,14 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
   let lang = "en";
   try { if (localStorage.getItem("mca-lang") === "zh") lang = "zh"; } catch (_) {}
   const t = () => T[lang];
+  // Restaurant time (Troy, Michigan): the dashboard shows days and times as they are at the restaurant,
+  // wherever the person looking at it is. rt() turns a real moment into restaurant wall-clock time.
+  const RT_FMT = new Intl.DateTimeFormat("en-US", { timeZone: "America/Detroit", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric", hourCycle: "h23" });
+  const rt = date => { const p = Object.fromEntries(RT_FMT.formatToParts(date).map(x => [x.type, x.value])); return new Date(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second); };
+  const rnow = () => rt(new Date());
+  window.mcaRT = rt;
+  // Real mode: when the owner is signed in, every number comes from real website data (no samples).
+  let REAL = (() => { try { return localStorage.getItem("mca-staff-hint") === "1"; } catch (_) { return false; } })();
 
   // The menu comes from the website's own data file (src/data/menu.json). Same dishes, same names, same prices.
   const SITE = {"updated":"2026-09-30","categories":[{"id":"xian-specials","character":"西","title":"Xi'an specials","items":[{"name":"Chili oil-splashed noodles","chinese":"油泼面","spice":"SP","price":"From $10.99","description":"Wide hand-made noodles, chili, garlic, hot oil.","id":"chili-oil-splashed-noodles"},{"name":"Liangpi cold noodles","chinese":"西安面皮","spice":"SP","price":"From $9.89","description":"Cold skin noodles in chili oil.","id":"liangpi-cold-noodles"},{"name":"Cumin lamb roujiamo","chinese":"孜然羊肉肉夹馍","price":"From $9.99","description":"Wok-fried lamb with cumin in your choice of bun.","id":"cumin-lamb-roujiamo"},{"name":"Braised pork roujiamo","chinese":"猪肉肉夹馍","price":"From $7.99","description":"Slow-braised pork in your choice of bun.","id":"braised-pork-roujiamo"},{"name":"Spicy chicken roujiamo","chinese":"香辣鸡肉肉夹馍","spice":"SP","price":"From $8.99","description":"Spiced chicken in your choice of bun.","id":"spicy-chicken-roujiamo"},{"name":"Xi'an lamb bread soup","chinese":"羊肉泡馍","price":"From $14.99","description":"Lamb broth, lamb, torn flatbread, sweet potato noodle, tofu skin, wood ear, lily flower.","id":"xi-an-lamb-bread-soup"}]},{"id":"noodles","character":"面","title":"Hand-made noodles","items":[{"name":"Beef noodle soup","chinese":"兰州牛肉面","price":"From $13.99","description":"Clear beef broth, beef shank, white radish, cilantro, scallion.","id":"beef-noodle-soup"},{"name":"Braised beef noodle soup","chinese":"红烧牛肉面","spice":"SP3","price":"From $13.99","description":"Rich braised beef broth, braised beef, scallion.","id":"braised-beef-noodle-soup"},{"name":"Spicy and sour beef noodle soup","chinese":"酸汤牛肉面","spice":"SP5","price":"From $13.99","description":"Spicy, sour beef broth, beef shank, Chinese pickles, cilantro.","id":"spicy-and-sour-beef-noodle-soup"},{"name":"Chongqing noodle soup","chinese":"重庆小面","spice":"SP2","price":"From $13.99","description":"Spicy beef broth, fried ground pork, soybeans, garlic, peanuts, preserved pickle, sesame.","id":"chongqing-noodle-soup"},{"name":"Lamb noodle soup","chinese":"滋补羊肉烩面","price":"From $13.99","description":"Rich lamb broth, lamb, sweet potato noodle, tofu skin, wood ear, lily flower.","id":"lamb-noodle-soup"},{"name":"Braised chicken belt noodles","chinese":"大盘鸡裤带面","spice":"SP3","price":"From $13.99","description":"Wide belt noodles, braised chicken legs, greens.","id":"braised-chicken-belt-noodles"},{"name":"Beijing zhajiang noodles","chinese":"老北京炸酱面","price":"From $12.99","description":"Brown pork sauce, sesame, fried egg, carrot, cucumber.","id":"beijing-zhajiang-noodles"},{"name":"Tomato and egg knife-shaved noodles","chinese":"西红柿鸡蛋刀削面","price":"From $12.99","description":"Tomato and egg broth, preserved pickle, cucumber, scallion.","id":"tomato-and-egg-knife-shaved-noodles"},{"name":"Dan dan noodles","chinese":"担担面","spice":"SP","price":"From $12.99","description":"Sweet and spicy sesame chili sauce, crushed peanuts optional.","id":"dan-dan-noodles"},{"name":"Garlic noodles","chinese":"蒜香素拌面","price":"$11.99","description":"Tossed with garlic. No meat.","id":"garlic-noodles"}]},{"id":"small-plates","character":"菜","title":"Small plates","items":[{"name":"Garlic cucumber salad","chinese":"拍黄瓜","price":"From $5.49","description":"Smashed cucumber, garlic, soy, vinegar. Chili oil optional.","id":"garlic-cucumber-salad"},{"name":"Black wood ear","chinese":"爽口木耳","price":"$5.99","description":"Wood ear, cilantro, onion, spiced dressing.","id":"black-wood-ear"},{"name":"Spicy wonton soup","chinese":"红油抄手","spice":"SP","price":"$8.99","description":"Large pork wontons, preserved pickle, scallion, cilantro.","id":"spicy-wonton-soup"},{"name":"Red chili wontons, 8","chinese":"红油抄手","spice":"SP","price":"From $9.99","description":"Pork wontons in red chili oil.","id":"red-chili-wontons-8"},{"name":"Chicken egg rolls, 2","chinese":"鸡肉蛋卷","price":"$4.49","description":"Chicken and vegetables.","id":"chicken-egg-rolls-2"}]},{"id":"dim-sum","character":"点","title":"Dim sum and snacks","items":[{"name":"Soup dumplings, 6","chinese":"手工灌汤小笼包","price":"$10.99","description":"Hand-made pork soup dumplings. Made fresh, 10 to 15 minutes.","id":"soup-dumplings-6"},{"name":"Crystal shrimp dumplings, 6","chinese":"水晶虾饺","price":"$7.99","description":"Made fresh, 10 to 15 minutes.","id":"crystal-shrimp-dumplings-6"},{"name":"Beef dumplings","chinese":"牛肉蒸饺","price":"$9.99","description":"Ground beef, carrot, onion.","id":"beef-dumplings"},{"name":"Jianbing","chinese":"煎饼果子","price":"From $6.99","description":"Chinese crepe, crispy cracker, preserved pickle, scallion, sweet sauce.","id":"jianbing"},{"name":"Scallion pancake","chinese":"葱油饼","price":"$6.49","description":"Crisp, layered, green onion.","id":"scallion-pancake"},{"name":"Shrimp spring rolls, 3","chinese":"虾春卷","price":"$4.99","id":"shrimp-spring-rolls-3"},{"name":"Vegetable spring rolls, 3","chinese":"素春卷","price":"$3.99","id":"vegetable-spring-rolls-3"},{"name":"Tea egg","chinese":"茶叶蛋","price":"$2.99","description":"Simmered in tea and spice.","id":"tea-egg"},{"name":"House chili oil","chinese":"辣椒油","spice":"SP","price":"$6.99","description":"Our own, made in the kitchen.","id":"house-chili-oil"}]},{"id":"drinks","character":"饮","title":"Tea, boba and drinks","items":[{"name":"Hong Kong milk tea","chinese":"港式奶茶","price":"From $4.99","id":"hong-kong-milk-tea"},{"name":"Taro ube latte","chinese":"芋头奶茶","price":"From $4.99","id":"taro-ube-latte"},{"name":"Wintermelon green tea","chinese":"冬瓜绿茶","price":"From $4.99","id":"wintermelon-green-tea"},{"name":"Mango smoothie","price":"From $5.99","id":"mango-smoothie"},{"name":"Pink peach sparkling refresher","price":"From $5.99","id":"pink-peach-sparkling-refresher"}]}]};
@@ -1019,18 +1041,18 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
         for (const row of parsed) {
           if (!row || typeof row.id !== "string" || typeof row.name !== "string" || found.has(row.id)) continue;
           const rawItems = Array.isArray(row.items) ? row.items : row.lines;
-          const at = new Date(row.createdAt || row.at);
+          const at = rt(new Date(row.createdAt || row.at));
           const cents = Number(row.totalCents ?? row.total);
           if (!Array.isArray(rawItems) || !rawItems.length || !Number.isFinite(at.getTime()) || !Number.isFinite(cents) || cents < 0) continue;
           const items = rawItems.filter(item => item && typeof item.name === "string").map((item, i) => ({
-            id: `website-${row.id}-${i}`, q: Math.max(1, Number(item.quantity ?? item.qty) || 1),
+            id: typeof item.id === "string" && item.id ? item.id : `website-${row.id}-${i}`, q: Math.max(1, Number(item.quantity ?? item.qty) || 1),
             name: item.name, chinese: item.chinese || "", price: Number(item.unitCents ?? item.cents) / 100 || 0
           }));
           if (!items.length) continue;
           found.set(row.id, { id: row.id, web: true, createdAt: at.getTime(), date: at, name: row.name,
             phone: typeof row.phone === "string" ? row.phone : "", notes: typeof row.notes === "string" ? row.notes : "",
             type: "pickup", placed: at.getHours() * 60 + at.getMinutes(), total: cents / 100, items,
-            customerStatus: row.status, sched: null });
+            customerStatus: row.status, sched: null, pickupAt: row.pickup && row.pickup.at ? rt(new Date(row.pickup.at)) : null });
         }
       } catch (_) {}
     }
@@ -1038,7 +1060,9 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
   }
   function syncCustomerOrders() {
     for (const d of DAYS) {
-      for (let i = d.orders.length - 1; i >= 0; i--) if (d.orders[i].web) d.orders.splice(i, 1);
+      d.orders.length = 0;
+      if (!REAL && d.sample) d.orders.push(...d.sample);
+      if (d.closedBase !== undefined) d.closed = d.closedBase;
     }
     for (const order of readCustomerOrders()) {
       // Orders older than the board's history are skipped; anything newer than the last day counts as today.
@@ -1046,7 +1070,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       if (!target) continue;
       if (target.closed) target.closed = false; // a website order on a closed day still shows
       target.orders.push(order);
-      for (const item of order.items) BY_ID[item.id] = { id: item.id, en: item.name, zh: item.chinese, price: item.price, w: 0, drink: false };
+      for (const item of order.items) if (!BY_ID[item.id]) BY_ID[item.id] = { id: item.id, en: item.name, zh: item.chinese, price: item.price, w: 0, drink: false };
     }
   }
   function renderConfirmedDemoOrders() {
@@ -1115,10 +1139,10 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
   }
 
   // Demo day: today, or Tuesday if today is a Monday (closed). The clock starts in the dinner rush.
-  const day = new Date(); day.setHours(12, 0, 0, 0); // always the real date, so website orders placed today land in Today (even on a closed Monday)
+  const day = rnow(); day.setHours(12, 0, 0, 0); // always the real date, so website orders placed today land in Today (even on a closed Monday)
   const seed = day.getFullYear() * 1000 + day.getMonth() * 40 + day.getDate();
   const START = 18 * 60 + 40, OPEN = 11 * 60 + 30, CLOSE = 21 * 60, loadedAt = Date.now();
-  const now = () => START + (Date.now() - loadedAt) / 60000;
+  const now = () => { if (!REAL) return START + (Date.now() - loadedAt) / 60000; const x = rnow(); return x.getHours() * 60 + x.getMinutes() + x.getSeconds() / 60; };
 
   const NAMES = ["Grace L.", "Wei Z.", "Priya S.", "Jason K.", "Emily R.", "Mohammed A.", "Hannah P.", "Daniel L.", "Mei C.", "Tom B.", "Arjun N.", "Sofia M.", "Linh T.", "Rachel O.", "Yusuf D.", "Chen Y.", "Olivia W.", "Marcus J.", "Aiko F.", "Brian S.", "Fatima H.", "Jenny X.", "Luis G.", "Nina V.", "Xiaoyu L.", "Derek M."];
   function pick(r) { let x = r() * WSUM; for (const m of MENU) { x -= m.w; if (x <= 0) return m; } return MENU[0]; }
@@ -1162,6 +1186,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
     o.total = o.items.reduce((x, it) => x + BY_ID[it.id].price * it.q, 0);
     FUTURE[key(dt)] = [o]; break;
   }
+  DAYS.forEach(d => { d.sample = d.orders.slice(); d.closedBase = !!d.closed; });
 
   // Status is worked out from the clock, nobody has to tap anything
   function statusIn(d, o, n) { return o.web || d.today ? statusOf(o, n) : d.future ? "later" : "done"; }
@@ -1175,7 +1200,15 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
 
   // ---------- Orders tab ----------
   let owk = 0, zoomKey = readCustomerOrders().length ? key(day) : null, freshKey = null, needScroll = true;
-  const dayOrders = d => d.future ? (FUTURE[key(d.dt)] || []) : d.orders;
+  const dayOrders = d => d.future ? (REAL ? [] : FUTURE[key(d.dt)] || []) : d.orders;
+  // "Pickup 7:15 pm" / "Pickup ASAP" for website orders
+  const pickupText = o => {
+    if (!o.web) return t()[o.type];
+    if (!o.pickupAt) return lang === "zh" ? "尽快自取" : "Pickup ASAP";
+    const sameDay = key(o.pickupAt) === key(rnow());
+    const at = clock(o.pickupAt.getHours() * 60 + o.pickupAt.getMinutes());
+    return (lang === "zh" ? "自取 " : "Pickup ") + (sameDay ? at : t().days[o.pickupAt.getDay()] + " " + at);
+  };
   const WEB_ST = { new: ["New", "新订单"], preparing: ["Preparing", "准备中"], ready: ["Ready", "待取餐"] };
   const WEB_NEXT = { new: ["preparing", "Mark preparing", "开始准备"], preparing: ["ready", "Mark ready", "标记待取"], ready: ["complete", "Mark picked up", "标记已取"] };
   const stLabel = (st, o) => o.web && st === "wait" ? (WEB_ST[o.customerStatus] || WEB_ST.new)[lang === "zh" ? 1 : 0] : st === "later" ? t().st.later(clock(o.sched)) : st === "wait" ? t().st.wait : (o.type === "pickup" ? t().st.pickedUp : t().st.delivered);
@@ -1228,7 +1261,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
     if (d.closed) return `<div class="col closed"><span class="c-head">${head}<span class="c-sum">${t().closed}</span></span></div>`;
     const os = sortOs(dayOrders(d));
     const sum = d.future ? "" : `<span class="c-sum"><b>${money0(os.reduce((x, o) => x + o.total, 0))}</b> · ${t().ordersN(os.length)}</span>`;
-    const cards = os.length ? os.map(o => { const st = statusIn(d, o, n); return `<span class="card ${st}${o.placed === freshKey ? " fresh" : ""}"><span class="c-time">${clock(o.sched || o.placed)}</span><span class="c-st">${stLabel(st, o)}</span><span class="c-name">${esc(o.name)}</span><span class="c-total">${money(o.total)}</span><span class="c-type">${t()[o.type]}</span></span>`; }).join("") : `<span class="c-empty">${d.future ? t().upcoming : t().noOrders}</span>`;
+    const cards = os.length ? os.map(o => { const st = statusIn(d, o, n); return `<span class="card ${st}${o.placed === freshKey ? " fresh" : ""}"><span class="c-time">${clock(o.sched || o.placed)}</span><span class="c-st">${stLabel(st, o)}</span><span class="c-name">${esc(o.name)}</span><span class="c-total">${money(o.total)}</span><span class="c-type">${pickupText(o)}</span></span>`; }).join("") : `<span class="c-empty">${d.future ? t().upcoming : t().noOrders}</span>`;
     return `<button type="button" class="col${d.today ? " today" : ""}" data-k="${k}"><span class="c-head">${head}${sum}</span><span class="cards">${cards}</span><span class="c-open">${t().open}</span></button>`;
   }
   function renderZoom(view, days, n, opt) {
@@ -1245,7 +1278,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       <div class="kpis hero">${kpi(t().dayOrders, os.length, "", false, ["z-n-" + zoomKey, "int"])}${kpi(t().daySales, money0(os.reduce((x, o) => x + o.total, 0)), "", false, ["z-s-" + zoomKey, "money0", os.reduce((x, o) => x + o.total, 0)])}${kpi(t().dayPickup + " / " + t().dayDelivery, pk.length + " / " + (os.length - pk.length), "")}</div>
       <ul class="orders">${os.length ? os.map(o => { const st = statusIn(d, o, n); return `<li class="order${o.web ? " website-demo" : ""}"${o.web ? ` data-customer-order="${esc(o.id)}"` : ""}>
         <span class="o-time">${clock(o.sched || o.placed)}</span>
-        <span class="o-who"><span class="o-name">${esc(o.name)}</span>${o.web ? `<span class="website-order-tag">Website demo</span>` : ""}<span class="o-type">${t()[o.type]}</span><span class="o-items">${esc(o.items.map(it => it.q + " " + nameOf(BY_ID[it.id])).join(", "))}</span>${o.web ? `<span class="o-customer-note">MCA-${esc(o.id.slice(0, 8).toUpperCase())}${o.phone ? " · " + esc(o.phone) : ""}</span>${o.notes ? `<span class="o-customer-note">Note: ${esc(o.notes)}</span>` : ""}` : ""}</span>
+        <span class="o-who"><span class="o-name">${esc(o.name)}</span>${o.web ? `<span class="website-order-tag">${REAL ? (lang === "zh" ? "网站" : "Website") : "Website demo"}</span>` : ""}<span class="o-type">${pickupText(o)}</span><span class="o-items">${esc(o.items.map(it => it.q + " " + nameOf(BY_ID[it.id])).join(", "))}</span>${o.web ? `<span class="o-customer-note">MCA-${esc(o.id.slice(0, 8).toUpperCase())}${o.phone ? " · " + esc(o.phone) : ""}</span>${o.notes ? `<span class="o-customer-note">Note: ${esc(o.notes)}</span>` : ""}` : ""}</span>
         <span class="o-total">${money(o.total)}</span>${o.web && WEB_NEXT[o.customerStatus] ? `<span class="o-state"><span class="status ${st}">${stLabel(st, o)}</span><button type="button" class="o-advance" data-advance="${esc(o.id)}" data-status="${WEB_NEXT[o.customerStatus][0]}">${WEB_NEXT[o.customerStatus][lang === "zh" ? 2 : 1]}</button></span>` : `<span class="status ${st}">${stLabel(st, o)}</span>`}</li>`; }).join("") : `<li class="order"><span class="c-empty" style="grid-column:1/-1">${d.future ? t().upcoming : t().noOrders}</span></li>`}</ul>
     </div>`;
     const z = view.querySelector(".zoom");
@@ -1283,7 +1316,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
     document.getElementById("wkNext").disabled = wk === 0;
     const wkk = document.getElementById("weekKpis");
     wkk.innerHTML =
-      kpi(cur ? t().wkSales : t().wkSalesPast, money0(s), cur ? t().vsSoFar(dtxt) : t().vsPrev(dtxt), false, ["w-s", "money0", s]) +
+      kpi(cur ? t().wkSales : t().wkSalesPast, money0(s), !ps ? (lang === "zh" ? "上周没有订单可比" : "no orders the week before to compare") : cur ? t().vsSoFar(dtxt) : t().vsPrev(dtxt), false, ["w-s", "money0", s]) +
       kpi(t().wkOrders, curO.length, "", false, ["w-n", "int"]) +
       kpi(t().wkAvg, money(curO.length ? s / curO.length : 0), "", false, ["w-a", "money", curO.length ? s / curO.length : 0]);
     runCounters(wkk, opt.fresh);
@@ -1369,13 +1402,20 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
   const DISH = saved.added.map(x => ({ id: x.id, en: x.name, zh: x.chinese || "", price: +x.price, cat: x.cat, off: saved.off.includes(x.id), photo: null, custom: true }))
     .concat(MENU.map(m => ({ id: m.id, en: m.en, zh: m.zh, price: m.price, cat: m.cat, off: saved.off.includes(m.id), photo: PHOTO[m.id] || null })));
   // Live menu from the shared database (live.js): replaces this browser's copy.
+  let serverPhotos = {};
   window.mcaApplyMenu = st => {
     if (!st || !Array.isArray(st.off) || !Array.isArray(st.added)) return;
+    if (st.photos && JSON.stringify(st.photos) !== JSON.stringify(serverPhotos)) {
+      serverPhotos = st.photos;
+      DISH.forEach(d => { if (serverPhotos[d.id]) d.photo = serverPhotos[d.id]; });
+      if (modal.hidden && !document.getElementById("menu").hidden) renderGrid();
+    }
+    st = { off: st.off, added: st.added };
     if (JSON.stringify(st) === JSON.stringify(menuNow())) return;
     try { localStorage.setItem(STATE_KEY, JSON.stringify(st)); } catch (_) {}
     for (let i = DISH.length - 1; i >= 0; i--) if (DISH[i].custom) DISH.splice(i, 1);
     DISH.forEach(d => { d.off = st.off.includes(d.id); });
-    DISH.unshift(...st.added.map(x => ({ id: x.id, en: x.name, zh: x.chinese || "", price: +x.price, cat: x.cat, off: st.off.includes(x.id), photo: null, custom: true })));
+    DISH.unshift(...st.added.map(x => ({ id: x.id, en: x.name, zh: x.chinese || "", price: +x.price, cat: x.cat, off: st.off.includes(x.id), photo: serverPhotos[x.id] || null, custom: true })));
     if (modal.hidden) renderMenu();
   };
   window.mcaMenuNow = menuNow;
@@ -1444,14 +1484,31 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
   });
   document.getElementById("menuRoot").addEventListener("change", e => {
     const inp = e.target.closest("[data-photo]"); if (!inp || !inp.files[0]) return;
-    const d = DISH.find(x => x.id === inp.dataset.photo); d.photo = URL.createObjectURL(inp.files[0]);
+    const d = DISH.find(x => x.id === inp.dataset.photo), file = inp.files[0]; d.photo = URL.createObjectURL(file);
     const card = inp.closest(".dish"), ph = card.querySelector(".ph");
     ph.style.backgroundImage = `url('${d.photo}')`; const pin = ph.querySelector(".ph-in"); if (pin) pin.outerHTML = `<span class="edit">${ICON_PEN}</span>`; renderSide();
+    // Save the photo for everyone (website + other devices) when signed in.
+    if (window.mcaLive?.uploadPhoto) window.mcaLive.uploadPhoto(d.id, file);
   });
 
   // ---------- Website tab ----------
   function renderSite() {
     const wkN = DAYS.slice(NDAYS - 7).reduce((s, d) => s + d.orders.length, 0);
+    if (REAL) {
+      // Real counts for the last 7 days (restaurant days).
+      const since = rnow(); since.setDate(since.getDate() - 6);
+      const sinceKey = `${since.getFullYear()}-${String(since.getMonth() + 1).padStart(2, "0")}-${String(since.getDate()).padStart(2, "0")}`;
+      const sum = kind => (window.mcaVisits || []).filter(r => r.kind === kind && r.day >= sinceKey).reduce((n, r) => n + Number(r.count), 0);
+      const zh = lang === "zh";
+      document.getElementById("siteKpis").innerHTML =
+        kpi(zh ? "最近 7 天访问" : "Visits, last 7 days", sum("view"), zh ? "网站页面浏览次数" : "pages opened on the website") +
+        kpi(zh ? "开始点餐" : "Started an order", sum("order"), zh ? `${wkN} 个订单已提交` : `${wkN} order${wkN === 1 ? "" : "s"} placed`) +
+        kpi(zh ? "电话点击" : "Call taps", sum("call"), zh ? "点击了餐厅电话" : "tapped the phone number");
+      document.getElementById("checklist").innerHTML = (zh ? T.zh : T.en).realChecks.map(c => `<li><span class="what">${c[0]}</span><span class="chip live">${t().live}</span><span class="why">${c[1]}</span></li>`).join("");
+      const skr = document.getElementById("siteKpis");
+      skr.querySelectorAll(".k-value").forEach((el, i) => { el.dataset.id = "s" + i; el.dataset.v = el.textContent; el.dataset.f = "int"; });
+      return;
+    }
     const visits = Math.round(wkN * 3.1 + rng(seed + 31)() * 60);
     document.getElementById("siteKpis").innerHTML = kpi(t().sVisits, visits, t().vVisits) + kpi(t().sOrder, Math.round(visits * 0.31), t().vOrder) + kpi(t().sCall, Math.round(visits * 0.07), t().vCall);
     document.getElementById("checklist").innerHTML = t().checks.map(c => `<li><span class="what">${c[0]}</span><span class="chip ${c[2] ? "soon" : "live"}">${c[2] ? t().soon : t().live}</span><span class="why">${c[1]}</span></li>`).join("");
@@ -1461,7 +1518,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
 
   function renderTop() {
     document.documentElement.lang = lang;
-    document.querySelectorAll("[data-t]").forEach(el => { el.textContent = t()[el.dataset.t]; });
+    document.querySelectorAll("[data-t]").forEach(el => { el.textContent = t()[REAL && el.dataset.t === "sample" ? "sampleReal" : el.dataset.t]; });
     document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
     moveThumb(document.getElementById("langSeg")); moveInk();
     document.getElementById("today").textContent = t().daysLong[day.getDay()] + ", " + t().date(day) + " · " + clock(now());
@@ -1528,7 +1585,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
     if (id === "sales") renderSales({ fresh: true, bars: true, swap: false });
     if (id === "orders") { renderOrders({ fresh: true, anim: zoomKey ? "enter" : (dir ? "" : "enter") }); }
     if (id === "menu") renderMenu();
-    if (id === "site") runCounters(document.getElementById("siteKpis"), true);
+    if (id === "site") { renderSite(); runCounters(document.getElementById("siteKpis"), true); }
     if (id === "chat") window.mcaLive?.renderChat();
     [...panel.children].forEach((c, i) => c.style.setProperty("--i", i));
     replay(panel, "tab-swap", dir);
@@ -1570,6 +1627,16 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
   }
   window.mcaRenderSamples = () => { renderOrders(); };
   window.mcaToast = html => toast(html);
+  window.mcaSetReal = on => {
+    if (REAL === !!on) return;
+    REAL = !!on;
+    try { if (REAL) localStorage.setItem("mca-staff-hint", "1"); else localStorage.removeItem("mca-staff-hint"); } catch (_) {}
+    chartSig = "";
+    renderAll();
+    window.mcaLive?.renderReservations?.();
+  };
+  window.mcaIsReal = () => REAL;
+  window.mcaRenderSite = () => renderSite();
   window.mcaLang = () => lang;
   renderTop(); renderSite(); renderMenu();
   const h = (location.hash || "").slice(1);

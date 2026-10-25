@@ -4,6 +4,8 @@ import type { FormEvent } from 'react';
 import type { Category } from './types/menu';
 import { formatCents, isValidPhone, MAX_ITEM_QUANTITY, priceToCents } from './orderHelpers';
 import { customerRequest, type SubmittedOrder } from './lib/service';
+import { describeTime, pickupOptions } from './lib/restaurantTime';
+import { track } from './lib/track';
 
 const thumbs: Record<string, string> = {
   'Chili oil-splashed noodles': 'chili-oil-noodles.webp',
@@ -26,6 +28,10 @@ export default function QuickOrder({ categories }: Props) {
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [notes, setNotes] = useState('');
+  const [pickup, setPickup] = useState('asap');
+  const pickupChoices = useMemo(() => pickupOptions(), [step]);
+  useEffect(() => { if (pickupChoices.length && !pickupChoices.some(option => option.value === pickup)) setPickup(pickupChoices[0].value); }, [pickupChoices, pickup]);
+  const pickupLabel = pickupChoices.find(option => option.value === pickup)?.label ?? '';
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState('');
@@ -126,6 +132,7 @@ export default function QuickOrder({ categories }: Props) {
     setName('');
     setPhoneNumber('');
     setNotes('');
+    setPickup('asap');
     setErrors({});
     setConfirmation(null);
     setSubmitError('');
@@ -143,6 +150,7 @@ export default function QuickOrder({ categories }: Props) {
         phone: phoneNumber.trim(),
         notes: notes.trim(),
         items: lines.map(line => ({ id: line.key, quantity: line.qty })),
+        pickup: pickup === 'asap' ? { asap: true } : { at: pickup },
       };
       // Keep the same retry ID after a lost response or refresh. A changed
       // payload receives a new ID; the server also enforces this invariant.
@@ -181,7 +189,7 @@ export default function QuickOrder({ categories }: Props) {
         {history.length > 0 && <details className="qo-stage-card" id="qo-saved-orders" data-testid="customer-order-history">
           <summary>Your saved review submissions ({history.length})</summary>
           {historyError && <p role="status">{historyError}</p>}
-          <ul className="qo-review-lines">{history.map(order => <li key={order.id}><span>MCA-{order.id.slice(0, 8).toUpperCase()}<small>{new Date(order.createdAt).toLocaleString()} · {order.status}</small></span><strong>{formatCents(order.totalCents)}</strong></li>)}</ul>
+          <ul className="qo-review-lines">{history.map(order => <li key={order.id}><span>MCA-{order.id.slice(0, 8).toUpperCase()}<small>{(() => { const pickup = (order.details as { pickup?: { at?: string } } | undefined)?.pickup; return pickup?.at ? `Pickup ${describeTime(pickup.at)}` : 'Pickup as soon as possible'; })()} · {order.status}</small></span><strong>{formatCents(order.totalCents)}</strong></li>)}</ul>
         </details>}
 
         <ol className="qo-flow-steps" aria-label="Order steps">
@@ -225,9 +233,9 @@ export default function QuickOrder({ categories }: Props) {
                     {current.items.map(item => {
                       const key = item.id ?? item.name;
                       const quantity = qty[key] ?? 0;
-                      const photo = thumbs[item.name];
+                      const photo = item.photo || (thumbs[item.name] ? `${base}images/${thumbs[item.name]}` : '');
                       return <li className={`qo-card ${item.soldOut ? 'sold' : ''} ${quantity ? 'has' : ''}`} key={key}>
-                        {photo && <img src={`${base}images/${photo}`} alt="" loading="lazy" decoding="async" />}
+                        {photo && <img src={photo} alt="" loading="lazy" decoding="async" />}
                         <div className="qo-body">
                           <h4>{item.name}{item.spice && <span className="spice">{item.spice}</span>}{item.isNew && <span className="new-tag">New</span>}</h4>
                           {item.chinese && <span className="qo-zh zh" lang="zh">{item.chinese}</span>}
@@ -249,7 +257,7 @@ export default function QuickOrder({ categories }: Props) {
                 {linesSummary('qo-lines')}
                 <div className="qo-total"><span>{anyFrom ? 'Starting subtotal' : 'Subtotal'}</span><strong>{formatCents(total)}{anyFrom ? '+' : ''}</strong></div>
                 {anyFrom && <p className="qo-note">Some dishes have options that can affect the final price.</p>}
-                <button type="button" className="button button-red qo-go" onClick={() => setStep('details')} data-testid="qo-order-flow">Pickup details <ArrowRight size={18} aria-hidden="true" /></button>
+                <button type="button" className="button button-red qo-go" onClick={() => { setStep('details'); track('order'); }} data-testid="qo-order-flow">Pickup details <ArrowRight size={18} aria-hidden="true" /></button>
               </aside>}
             </div>
           )}
@@ -270,6 +278,12 @@ export default function QuickOrder({ categories }: Props) {
                     <label htmlFor="qo-phone">Phone <span>(optional)</span></label>
                     <input id="qo-phone" type="tel" maxLength={25} autoComplete="tel" inputMode="tel" value={phoneNumber} onChange={event => { setPhoneNumber(event.target.value); setErrors(current => ({ ...current, phone: undefined })); }} aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'qo-phone-error' : undefined} data-testid="qo-input-phone" />
                     {errors.phone && <p className="qo-error" id="qo-phone-error" role="alert">{errors.phone}</p>}
+                  </div>
+                  <div className="qo-field qo-field-wide">
+                    <label htmlFor="qo-pickup">Pickup time</label>
+                    <select id="qo-pickup" value={pickup} onChange={event => setPickup(event.target.value)} data-testid="qo-input-pickup">
+                      {pickupChoices.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    </select>
                   </div>
                   <div className="qo-field qo-field-wide">
                     <label htmlFor="qo-notes">Notes <span>(optional)</span></label>
@@ -295,6 +309,7 @@ export default function QuickOrder({ categories }: Props) {
                 <span className="eyebrow">Step 3 of 3</span>
                 <h3 className="qo-stage-title" id="qo-review-heading" tabIndex={-1} ref={headingRef}>Review your pickup</h3>
                 <p className="qo-stage-copy">For <strong>{name.trim()}</strong> · Pickup at Miss Chang An, {ADDRESS}</p>
+                <p className="qo-stage-copy">Pickup time: <strong>{pickupLabel}</strong></p>
                 {phoneNumber && <p className="qo-stage-copy">Phone: {phoneNumber}</p>}
                 {notes.trim() && <p className="qo-review-notes"><strong>Notes:</strong> {notes.trim()}</p>}
                 {linesSummary()}

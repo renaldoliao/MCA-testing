@@ -51870,6 +51870,27 @@ var menu = new Map(menu_default.categories.flatMap((category) => category.items)
   { name: item.name, chinese: "chinese" in item ? item.chinese : "", unitCents: Math.round(Number(item.price.replace(/[^0-9.]/g, "")) * 100), from: /^from/i.test(item.price) }
 ]));
 var CATEGORY_IDS = new Set(menu_default.categories.map((category) => category.id));
+function detroit(date6) {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Detroit", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(date6);
+  const get = (type) => parts.find((part) => part.type === type)?.value ?? "";
+  return { day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday")), minutes: Number(get("hour")) * 60 + Number(get("minute")), date: `${get("year")}-${get("month")}-${get("day")}` };
+}
+var isOpenAt = (date6) => {
+  const d = detroit(date6);
+  return d.day !== 1 && d.minutes >= 11 * 60 + 30 && d.minutes < 21 * 60;
+};
+function readPickup(input) {
+  const value = input;
+  if (!value || value.asap === true) return { asap: true };
+  if (typeof value.at !== "string") return null;
+  const at = new Date(value.at);
+  if (Number.isNaN(at.getTime()) || at.getTime() < Date.now() - 10 * 6e4 || at.getTime() > Date.now() + 8 * 864e5) return null;
+  return { at: at.toISOString() };
+}
+async function readPhotos() {
+  const result = await db.execute(sql`SELECT dish_id, extract(epoch from updated_at)::bigint AS v FROM mca_photos`);
+  return Object.fromEntries(result.rows.map((row) => [row.dish_id, `/api/photos/${encodeURIComponent(row.dish_id)}?v=${row.v}`]));
+}
 async function readMenuState() {
   const result = await db.execute(sql`SELECT state FROM mca_menu_state WHERE id = 'main'`);
   const state = result.rows[0]?.state;
@@ -52020,7 +52041,12 @@ router.post("/customer/orders", async (req, res) => {
     fail(res, 400, "Provide a pickup name and a valid optional phone number.");
     return;
   }
-  const fingerprint = hash(JSON.stringify(input));
+  const pickup = readPickup(req.body.pickup);
+  if (!pickup) {
+    fail(res, 400, "Choose a pickup time within the next week.");
+    return;
+  }
+  const fingerprint = hash(JSON.stringify({ ...input, pickup }));
   const [prior] = await db.select().from(submittedOrders).where(and(eq(submittedOrders.customerId, res.locals.customerId), eq(submittedOrders.requestId, input.requestId)));
   if (prior) {
     if (prior.fingerprint !== fingerprint) {
@@ -52056,7 +52082,7 @@ router.post("/customer/orders", async (req, res) => {
     customerId: res.locals.customerId,
     requestId: input.requestId,
     fingerprint,
-    details: { name: input.name.trim(), phone: input.phone.trim(), notes: input.notes.trim(), items, mode: "review" },
+    details: { name: input.name.trim(), phone: input.phone.trim(), notes: input.notes.trim(), items, pickup, mode: "review" },
     totalCents: items.reduce((n, item) => n + item.unitCents * item.quantity, 0)
   }).onConflictDoNothing({ target: [submittedOrders.customerId, submittedOrders.requestId] }).returning();
   const saved = created || (await db.select().from(submittedOrders).where(and(eq(submittedOrders.customerId, res.locals.customerId), eq(submittedOrders.requestId, input.requestId))))[0];
@@ -52085,6 +52111,51 @@ async function saveMessage(conversationId, role, input, res) {
   await db.update(conversations).set({ updatedAt: /* @__PURE__ */ new Date() }).where(eq(conversations.id, conversationId));
   res.json(messageResponse(saved));
 }
+var RESERVATION_STATUS = /* @__PURE__ */ new Set(["new", "confirmed", "declined", "seated", "cancelled"]);
+var reservationResponse = (row) => ({
+  id: row.id,
+  name: row.name,
+  phone: row.phone,
+  party: row.party,
+  at: new Date(row.at).toISOString(),
+  notes: row.notes,
+  status: row.status,
+  createdAt: new Date(row.created_at).toISOString(),
+  updatedAt: new Date(row.updated_at).toISOString()
+});
+router.get("/customer/reservations", async (_req, res) => {
+  const result = await db.execute(sql`SELECT * FROM mca_reservations WHERE customer_id = ${res.locals.customerId} ORDER BY at DESC LIMIT 20`);
+  res.json(result.rows.map(reservationResponse));
+});
+router.post("/customer/reservations", async (req, res) => {
+  const body = req.body || {};
+  const requestId = String(body.requestId || ""), name = String(body.name || "").trim().slice(0, 80), phone = String(body.phone || "").trim().slice(0, 25);
+  const notes = String(body.notes || "").trim().slice(0, 300), party = Number(body.party), at = new Date(String(body.at || ""));
+  if (!uuid5.test(requestId)) {
+    fail(res, 400, "Invalid booking request.");
+    return;
+  }
+  if (!name || !/^(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(phone)) {
+    fail(res, 400, "Enter your name and a 10 digit phone number so we can confirm.");
+    return;
+  }
+  if (!Number.isInteger(party) || party < 1 || party > 20) {
+    fail(res, 400, "Choose a party size from 1 to 20. For bigger groups, please call us.");
+    return;
+  }
+  if (Number.isNaN(at.getTime()) || at.getTime() < Date.now() + 15 * 6e4 || at.getTime() > Date.now() + 60 * 864e5 || !isOpenAt(at)) {
+    fail(res, 400, "Choose a time when we're open (Tuesday to Sunday, 11:30 am to 9 pm), within the next 60 days.");
+    return;
+  }
+  if (!await allow(`reservations:${res.locals.customerId}`, 10)) {
+    fail(res, 429, "Too many booking requests. Please call us.");
+    return;
+  }
+  const result = await db.execute(sql`INSERT INTO mca_reservations (id, customer_id, request_id, name, phone, party, at, notes)
+    VALUES (${randomUUID()}, ${res.locals.customerId}, ${requestId}, ${name}, ${phone}, ${party}, ${at.toISOString()}, ${notes})
+    ON CONFLICT (customer_id, request_id) DO UPDATE SET updated_at = mca_reservations.updated_at RETURNING *`);
+  res.json(reservationResponse(result.rows[0]));
+});
 router.get("/customer/messages", async (_req, res) => {
   const [conversation] = await db.select().from(conversations).where(eq(conversations.customerId, res.locals.customerId));
   if (!conversation) {
@@ -52123,13 +52194,75 @@ router.post("/staff-login", async (req, res) => {
   res.json({ authorized: true });
 });
 router.get("/menu-state", async (_req, res) => {
-  res.json(await readMenuState());
+  res.json({ ...await readMenuState(), photos: await readPhotos() });
+});
+router.get("/photos/:dishId", async (req, res) => {
+  const result = await db.execute(sql`SELECT mime, data FROM mca_photos WHERE dish_id = ${String(req.params.dishId)}`);
+  const row = result.rows[0];
+  if (!row) {
+    fail(res, 404, "No photo.");
+    return;
+  }
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  res.setHeader("Content-Type", row.mime);
+  res.send(row.data);
+});
+var VISIT_KINDS = /* @__PURE__ */ new Set(["view", "order", "call"]);
+router.post("/visit", async (req, res) => {
+  const kind = String(req.body?.kind || "");
+  if (!VISIT_KINDS.has(kind)) {
+    fail(res, 400, "Unknown visit.");
+    return;
+  }
+  if (!await allow(`visit:${req.ip}`, 300)) {
+    res.json({ saved: false });
+    return;
+  }
+  await db.execute(sql`INSERT INTO mca_visits (day, kind, count) VALUES (${detroit(/* @__PURE__ */ new Date()).date}::date, ${kind}, 1) ON CONFLICT (day, kind) DO UPDATE SET count = mca_visits.count + 1`);
+  res.json({ saved: true });
 });
 router.post("/staff-logout", (_req, res) => {
   res.clearCookie(STAFF_COOKIE, { path: "/api" });
   res.json({ authorized: false });
 });
 router.use("/staff", requireStaff);
+router.get("/staff/reservations", async (_req, res) => {
+  const result = await db.execute(sql`SELECT * FROM mca_reservations WHERE at > now() - interval '14 days' ORDER BY at ASC LIMIT 500`);
+  res.json(result.rows.map(reservationResponse));
+});
+router.patch("/staff/reservations/:id", async (req, res) => {
+  const id = String(req.params.id), status = String(req.body?.status || "");
+  if (!uuid5.test(id) || !RESERVATION_STATUS.has(status)) {
+    fail(res, 400, "Invalid booking or status.");
+    return;
+  }
+  const result = await db.execute(sql`UPDATE mca_reservations SET status = ${status}, updated_at = now() WHERE id = ${id} RETURNING *`);
+  const row = result.rows[0];
+  if (!row) {
+    fail(res, 404, "Booking not found.");
+    return;
+  }
+  res.json(reservationResponse(row));
+});
+router.get("/staff/visits", async (_req, res) => {
+  const result = await db.execute(sql`SELECT to_char(day, 'YYYY-MM-DD') AS day, kind, count FROM mca_visits WHERE day > current_date - 60 ORDER BY day`);
+  res.json(result.rows);
+});
+router.put("/staff/photos/:dishId", async (req, res) => {
+  const dishId = String(req.params.dishId).slice(0, 80);
+  const match = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(req.body?.dataUrl || ""));
+  if (!dishId || !match) {
+    fail(res, 400, "Send a JPEG, PNG or WebP photo.");
+    return;
+  }
+  const data = Buffer.from(match[2], "base64");
+  if (data.length > 7e5) {
+    fail(res, 413, "Photo is too large.");
+    return;
+  }
+  await db.execute(sql`INSERT INTO mca_photos (dish_id, mime, data, updated_at) VALUES (${dishId}, ${match[1]}, ${data}, now()) ON CONFLICT (dish_id) DO UPDATE SET mime = EXCLUDED.mime, data = EXCLUDED.data, updated_at = now()`);
+  res.json({ photos: await readPhotos() });
+});
 router.get("/staff/session", (_req, res) => {
   res.json({ authorized: true });
 });
@@ -52143,7 +52276,7 @@ router.put("/staff/menu-state", async (req, res) => {
   res.json(state);
 });
 router.get("/staff/orders", async (_req, res) => {
-  const rows = await db.select().from(submittedOrders).orderBy(desc(submittedOrders.createdAt)).limit(100);
+  const rows = await db.select().from(submittedOrders).where(gt(submittedOrders.createdAt, new Date(Date.now() - 75 * 864e5))).orderBy(desc(submittedOrders.createdAt)).limit(3e3);
   res.json(rows.map(orderResponse));
 });
 router.patch("/staff/orders/:id", async (req, res) => {
@@ -52253,6 +52386,8 @@ ALTER TABLE "mca_submitted_orders" ADD CONSTRAINT "mca_submitted_orders_customer
 CREATE UNIQUE INDEX "mca_message_retry" ON "mca_messages" USING btree ("conversation_id","request_id");
 CREATE UNIQUE INDEX "mca_order_retry" ON "mca_submitted_orders" USING btree ("customer_id","request_id");`;
 var ready = null;
+pool.on("error", () => {
+});
 function ensureTables() {
   if (!ready) ready = (async () => {
     const client = await pool.connect();
@@ -52262,6 +52397,13 @@ function ensureTables() {
       const { rows } = await client.query("SELECT to_regclass('public.mca_submitted_orders') AS t");
       if (!rows[0]?.t) await client.query(TABLES);
       await client.query("CREATE TABLE IF NOT EXISTS mca_menu_state (id text PRIMARY KEY, state jsonb NOT NULL, updated_at timestamp with time zone DEFAULT now() NOT NULL)");
+      await client.query(`CREATE TABLE IF NOT EXISTS mca_reservations (
+        id uuid PRIMARY KEY, customer_id uuid NOT NULL REFERENCES mca_customers(id), request_id uuid NOT NULL,
+        name text NOT NULL, phone text NOT NULL, party integer NOT NULL, at timestamp with time zone NOT NULL, notes text NOT NULL DEFAULT '',
+        status text NOT NULL DEFAULT 'new', created_at timestamp with time zone DEFAULT now() NOT NULL, updated_at timestamp with time zone DEFAULT now() NOT NULL,
+        UNIQUE (customer_id, request_id))`);
+      await client.query("CREATE TABLE IF NOT EXISTS mca_visits (day date NOT NULL, kind text NOT NULL, count integer NOT NULL DEFAULT 0, PRIMARY KEY (day, kind))");
+      await client.query("CREATE TABLE IF NOT EXISTS mca_photos (dish_id text PRIMARY KEY, mime text NOT NULL, data bytea NOT NULL, updated_at timestamp with time zone DEFAULT now() NOT NULL)");
       await client.query("COMMIT");
     } catch (error40) {
       await client.query("ROLLBACK").catch(() => void 0);
@@ -52280,6 +52422,7 @@ function ensureTables() {
 function createRestaurantApp() {
   const app = (0, import_express2.default)();
   app.set("trust proxy", 1);
+  app.use("/api/staff/photos", import_express2.default.json({ limit: "1mb" }));
   app.use(import_express2.default.json({ limit: "32kb" }));
   app.get("/api/healthz", (_req, res) => {
     res.json({ status: "ok" });

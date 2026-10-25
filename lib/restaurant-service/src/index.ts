@@ -15,6 +15,26 @@ const menu = new Map(catalog.categories.flatMap(category => category.items).map(
 ]));
 const CATEGORY_IDS = new Set(catalog.categories.map(category => category.id));
 type MenuState = { off: string[]; added: { id: string; name: string; chinese: string; price: number; cat: string }[] };
+// Restaurant time (Troy, Michigan). Closed Mondays, open 11:30 am to 9 pm.
+function detroit(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Detroit", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(date);
+  const get = (type: string) => parts.find(part => part.type === type)?.value ?? "";
+  return { day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday")), minutes: Number(get("hour")) * 60 + Number(get("minute")), date: `${get("year")}-${get("month")}-${get("day")}` };
+}
+const isOpenAt = (date: Date) => { const d = detroit(date); return d.day !== 1 && d.minutes >= 11 * 60 + 30 && d.minutes < 21 * 60; };
+// Pickup: "as soon as possible", or a chosen time within the next week.
+function readPickup(input: unknown): { asap: true } | { at: string } | null {
+  const value = input as { asap?: unknown; at?: unknown } | null | undefined;
+  if (!value || value.asap === true) return { asap: true };
+  if (typeof value.at !== "string") return null;
+  const at = new Date(value.at);
+  if (Number.isNaN(at.getTime()) || at.getTime() < Date.now() - 10 * 60000 || at.getTime() > Date.now() + 8 * 86400000) return null;
+  return { at: at.toISOString() };
+}
+async function readPhotos(): Promise<Record<string, string>> {
+  const result = await db.execute(sql`SELECT dish_id, extract(epoch from updated_at)::bigint AS v FROM mca_photos`);
+  return Object.fromEntries((result.rows as { dish_id: string; v: string }[]).map(row => [row.dish_id, `/api/photos/${encodeURIComponent(row.dish_id)}?v=${row.v}`]));
+}
 async function readMenuState(): Promise<MenuState> {
   const result = await db.execute(sql`SELECT state FROM mca_menu_state WHERE id = 'main'`);
   const state = (result.rows[0] as { state?: Partial<MenuState> } | undefined)?.state;
@@ -133,7 +153,9 @@ router.post("/customer/orders", async (req, res): Promise<void> => {
   if (!input.name.trim() || (input.phone && !/^(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(input.phone.trim()))) {
     fail(res, 400, "Provide a pickup name and a valid optional phone number."); return;
   }
-  const fingerprint = hash(JSON.stringify(input));
+  const pickup = readPickup((req.body as { pickup?: unknown }).pickup);
+  if (!pickup) { fail(res, 400, "Choose a pickup time within the next week."); return; }
+  const fingerprint = hash(JSON.stringify({ ...input, pickup }));
   const [prior] = await db.select().from(submittedOrders).where(and(eq(submittedOrders.customerId, res.locals.customerId), eq(submittedOrders.requestId, input.requestId)));
   if (prior) {
     if (prior.fingerprint !== fingerprint) { fail(res, 409, "This retry ID was already used for a different order."); return; }
@@ -153,7 +175,7 @@ router.post("/customer/orders", async (req, res): Promise<void> => {
   if (!await allow(`orders:${res.locals.customerId}`, 30)) { fail(res, 429, "Too many submissions. Try again later."); return; }
   const [created] = await db.insert(submittedOrders).values({
     id: randomUUID(), customerId: res.locals.customerId, requestId: input.requestId, fingerprint,
-    details: { name: input.name.trim(), phone: input.phone.trim(), notes: input.notes.trim(), items, mode: "review" },
+    details: { name: input.name.trim(), phone: input.phone.trim(), notes: input.notes.trim(), items, pickup, mode: "review" },
     totalCents: items.reduce((n, item) => n + item.unitCents! * item.quantity, 0),
   }).onConflictDoNothing({ target: [submittedOrders.customerId, submittedOrders.requestId] }).returning();
   const saved = created || (await db.select().from(submittedOrders).where(and(eq(submittedOrders.customerId, res.locals.customerId), eq(submittedOrders.requestId, input.requestId))))[0];
@@ -171,6 +193,32 @@ async function saveMessage(conversationId: string, role: string, input: { reques
   await db.update(conversations).set({ updatedAt: new Date() }).where(eq(conversations.id, conversationId));
   res.json(messageResponse(saved));
 }
+type ReservationRow = { id: string; name: string; phone: string; party: number; at: Date | string; notes: string; status: string; created_at: Date | string; updated_at: Date | string };
+const RESERVATION_STATUS = new Set(["new", "confirmed", "declined", "seated", "cancelled"]);
+const reservationResponse = (row: ReservationRow) => ({
+  id: row.id, name: row.name, phone: row.phone, party: row.party, at: new Date(row.at).toISOString(), notes: row.notes, status: row.status,
+  createdAt: new Date(row.created_at).toISOString(), updatedAt: new Date(row.updated_at).toISOString(),
+});
+router.get("/customer/reservations", async (_req, res): Promise<void> => {
+  const result = await db.execute(sql`SELECT * FROM mca_reservations WHERE customer_id = ${res.locals.customerId} ORDER BY at DESC LIMIT 20`);
+  res.json((result.rows as ReservationRow[]).map(reservationResponse));
+});
+router.post("/customer/reservations", async (req, res): Promise<void> => {
+  const body = (req.body || {}) as Record<string, unknown>;
+  const requestId = String(body.requestId || ""), name = String(body.name || "").trim().slice(0, 80), phone = String(body.phone || "").trim().slice(0, 25);
+  const notes = String(body.notes || "").trim().slice(0, 300), party = Number(body.party), at = new Date(String(body.at || ""));
+  if (!uuid.test(requestId)) { fail(res, 400, "Invalid booking request."); return; }
+  if (!name || !/^(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(phone)) { fail(res, 400, "Enter your name and a 10 digit phone number so we can confirm."); return; }
+  if (!Number.isInteger(party) || party < 1 || party > 20) { fail(res, 400, "Choose a party size from 1 to 20. For bigger groups, please call us."); return; }
+  if (Number.isNaN(at.getTime()) || at.getTime() < Date.now() + 15 * 60000 || at.getTime() > Date.now() + 60 * 86400000 || !isOpenAt(at)) {
+    fail(res, 400, "Choose a time when we're open (Tuesday to Sunday, 11:30 am to 9 pm), within the next 60 days."); return;
+  }
+  if (!await allow(`reservations:${res.locals.customerId}`, 10)) { fail(res, 429, "Too many booking requests. Please call us."); return; }
+  const result = await db.execute(sql`INSERT INTO mca_reservations (id, customer_id, request_id, name, phone, party, at, notes)
+    VALUES (${randomUUID()}, ${res.locals.customerId}, ${requestId}, ${name}, ${phone}, ${party}, ${at.toISOString()}, ${notes})
+    ON CONFLICT (customer_id, request_id) DO UPDATE SET updated_at = mca_reservations.updated_at RETURNING *`);
+  res.json(reservationResponse(result.rows[0] as ReservationRow));
+});
 router.get("/customer/messages", async (_req, res): Promise<void> => {
   const [conversation] = await db.select().from(conversations).where(eq(conversations.customerId, res.locals.customerId));
   if (!conversation) { res.json([]); return; }
@@ -194,12 +242,53 @@ router.post("/staff-login", async (req, res): Promise<void> => {
   res.cookie(STAFF_COOKIE, `${expires}.${staffSign(expires)}`, { httpOnly: true, secure: req.secure, sameSite: "lax", path: "/api", expires: new Date(expires) });
   res.json({ authorized: true });
 });
-router.get("/menu-state", async (_req, res): Promise<void> => { res.json(await readMenuState()); });
+router.get("/menu-state", async (_req, res): Promise<void> => { res.json({ ...await readMenuState(), photos: await readPhotos() }); });
+router.get("/photos/:dishId", async (req, res): Promise<void> => {
+  const result = await db.execute(sql`SELECT mime, data FROM mca_photos WHERE dish_id = ${String(req.params.dishId)}`);
+  const row = result.rows[0] as { mime: string; data: Buffer } | undefined;
+  if (!row) { fail(res, 404, "No photo."); return; }
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  res.setHeader("Content-Type", row.mime);
+  res.send(row.data);
+});
+const VISIT_KINDS = new Set(["view", "order", "call"]);
+router.post("/visit", async (req, res): Promise<void> => {
+  const kind = String((req.body as { kind?: unknown })?.kind || "");
+  if (!VISIT_KINDS.has(kind)) { fail(res, 400, "Unknown visit."); return; }
+  if (!await allow(`visit:${req.ip}`, 300)) { res.json({ saved: false }); return; }
+  await db.execute(sql`INSERT INTO mca_visits (day, kind, count) VALUES (${detroit(new Date()).date}::date, ${kind}, 1) ON CONFLICT (day, kind) DO UPDATE SET count = mca_visits.count + 1`);
+  res.json({ saved: true });
+});
 router.post("/staff-logout", (_req, res) => {
   res.clearCookie(STAFF_COOKIE, { path: "/api" });
   res.json({ authorized: false });
 });
 router.use("/staff", requireStaff);
+router.get("/staff/reservations", async (_req, res): Promise<void> => {
+  const result = await db.execute(sql`SELECT * FROM mca_reservations WHERE at > now() - interval '14 days' ORDER BY at ASC LIMIT 500`);
+  res.json((result.rows as ReservationRow[]).map(reservationResponse));
+});
+router.patch("/staff/reservations/:id", async (req, res): Promise<void> => {
+  const id = String(req.params.id), status = String((req.body as { status?: unknown })?.status || "");
+  if (!uuid.test(id) || !RESERVATION_STATUS.has(status)) { fail(res, 400, "Invalid booking or status."); return; }
+  const result = await db.execute(sql`UPDATE mca_reservations SET status = ${status}, updated_at = now() WHERE id = ${id} RETURNING *`);
+  const row = result.rows[0] as ReservationRow | undefined;
+  if (!row) { fail(res, 404, "Booking not found."); return; }
+  res.json(reservationResponse(row));
+});
+router.get("/staff/visits", async (_req, res): Promise<void> => {
+  const result = await db.execute(sql`SELECT to_char(day, 'YYYY-MM-DD') AS day, kind, count FROM mca_visits WHERE day > current_date - 60 ORDER BY day`);
+  res.json(result.rows);
+});
+router.put("/staff/photos/:dishId", async (req, res): Promise<void> => {
+  const dishId = String(req.params.dishId).slice(0, 80);
+  const match = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String((req.body as { dataUrl?: unknown })?.dataUrl || ""));
+  if (!dishId || !match) { fail(res, 400, "Send a JPEG, PNG or WebP photo."); return; }
+  const data = Buffer.from(match[2], "base64");
+  if (data.length > 700000) { fail(res, 413, "Photo is too large."); return; }
+  await db.execute(sql`INSERT INTO mca_photos (dish_id, mime, data, updated_at) VALUES (${dishId}, ${match[1]}, ${data}, now()) ON CONFLICT (dish_id) DO UPDATE SET mime = EXCLUDED.mime, data = EXCLUDED.data, updated_at = now()`);
+  res.json({ photos: await readPhotos() });
+});
 router.get("/staff/session", (_req, res) => { res.json({ authorized: true }); });
 router.put("/staff/menu-state", async (req, res): Promise<void> => {
   const state = cleanMenuState(req.body);
@@ -208,7 +297,8 @@ router.put("/staff/menu-state", async (req, res): Promise<void> => {
   res.json(state);
 });
 router.get("/staff/orders", async (_req, res): Promise<void> => {
-  const rows = await db.select().from(submittedOrders).orderBy(desc(submittedOrders.createdAt)).limit(100);
+  // Up to ~10 weeks of orders so the Sales tab can chart real history.
+  const rows = await db.select().from(submittedOrders).where(gt(submittedOrders.createdAt, new Date(Date.now() - 75 * 86400000))).orderBy(desc(submittedOrders.createdAt)).limit(3000);
   res.json(rows.map(orderResponse));
 });
 router.patch("/staff/orders/:id", async (req, res): Promise<void> => {

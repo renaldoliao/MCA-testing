@@ -5,6 +5,7 @@ import { ensureTables } from "./setup";
 export function createRestaurantApp() {
   const app = express();
   app.set("trust proxy", 1);
+  app.use("/api/staff/photos", express.json({ limit: "1mb" })); // dish photos are larger than other requests
   app.use(express.json({ limit: "32kb" }));
   app.get("/api/healthz", (_req, res) => { res.json({ status: "ok" }); });
   app.use("/api", (_req, _res, next) => { ensureTables().then(() => next(), next); });

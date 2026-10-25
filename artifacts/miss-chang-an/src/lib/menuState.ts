@@ -7,7 +7,7 @@ import type { Category } from '../types/menu';
 export const MENU_STATE_KEY = 'mca-menu-state';
 
 type Added = { id: string; name: string; chinese?: string; price: number; cat: string; description?: string };
-type State = { off: string[]; added: Added[] };
+type State = { off: string[]; added: Added[]; photos?: Record<string, string> };
 
 function readLocal(): State {
   try {
@@ -31,7 +31,7 @@ function fetchServer(): Promise<void> {
       if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) throw new Error('no server');
       const raw = await response.json();
       fromServer = true;
-      publish({ off: Array.isArray(raw.off) ? raw.off : [], added: Array.isArray(raw.added) ? raw.added : [] });
+      publish({ off: Array.isArray(raw.off) ? raw.off : [], added: Array.isArray(raw.added) ? raw.added : [], photos: raw.photos && typeof raw.photos === 'object' ? raw.photos : {} });
     })
     .catch(() => { if (!fromServer) publish(readLocal()); })
     .finally(() => { loading = null; });
@@ -60,10 +60,10 @@ export function useLiveMenu(base: Category[]): Category[] {
   return useMemo(() => base.map(cat => ({
     ...cat,
     items: [
-      ...cat.items.map(item => ({ ...item, soldOut: !!item.id && state.off.includes(item.id) })),
+      ...cat.items.map(item => ({ ...item, soldOut: !!item.id && state.off.includes(item.id), photo: (item.id && state.photos?.[item.id]) || undefined })),
       ...state.added.filter(a => a.cat === cat.id).map(a => ({
         id: a.id, name: a.name, chinese: a.chinese || undefined, description: a.description || undefined,
-        price: `$${Number(a.price).toFixed(2)}`, soldOut: state.off.includes(a.id), isNew: true,
+        price: `$${Number(a.price).toFixed(2)}`, soldOut: state.off.includes(a.id), isNew: true, photo: state.photos?.[a.id] || undefined,
       })),
     ],
   })), [base, state]);
