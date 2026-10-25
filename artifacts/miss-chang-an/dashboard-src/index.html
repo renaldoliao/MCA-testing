@@ -1106,7 +1106,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
   }
 
   // Demo day: today, or Tuesday if today is a Monday (closed). The clock starts in the dinner rush.
-  const day = new Date(); day.setHours(12, 0, 0, 0); if (day.getDay() === 1) day.setDate(day.getDate() + 1);
+  const day = new Date(); day.setHours(12, 0, 0, 0); // always the real date, so website orders placed today land in Today (even on a closed Monday)
   const seed = day.getFullYear() * 1000 + day.getMonth() * 40 + day.getDate();
   const START = 18 * 60 + 40, OPEN = 11 * 60 + 30, CLOSE = 21 * 60, loadedAt = Date.now();
   const now = () => START + (Date.now() - loadedAt) / 60000;
