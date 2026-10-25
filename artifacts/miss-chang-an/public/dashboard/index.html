@@ -1191,6 +1191,7 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       kpi(t().kSales, money0(sales), t().kSalesNote(money(sales / orders.length)), false, ["o-s", "money0", sales]) +
       kpi(t().kWaiting, waiting, t().kWaitNote(waiting), waiting > 0, ["o-w", "int"]);
     runCounters(ok, opt.fresh);
+    ok.style.display = zoomKey ? "none" : ""; // daily view has its own bar, so hide this one there
     const view = document.getElementById("orderView");
     const days = weekDays(owk);
     if (zoomKey) { renderZoom(view, days, n, opt); return; }
