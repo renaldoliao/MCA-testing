@@ -128,6 +128,28 @@
     finally { state.sending = false; renderChat(); }
   }
 
+  // ---------- Menu: sold out and new dishes, shared with the website ----------
+  let menuEditAt = 0, menuTick = 0, menuChain = Promise.resolve();
+  async function loadMenu() {
+    try {
+      const response = await fetch("/api/menu-state", { cache: "no-store" });
+      if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) return;
+      const st = await response.json();
+      if (Date.now() - menuEditAt > 8000) window.mcaApplyMenu?.(st);
+    } catch (_) { /* offline: keep what is on screen */ }
+  }
+  function saveMenu(st) {
+    menuEditAt = Date.now();
+    if (!state.authorized) {
+      window.mcaToast?.(L("Sign in to update the website menu. This change is only saved in this browser.", "请登录后再更新网站菜单。此更改只保存在本浏览器。"));
+      return;
+    }
+    // Save one change at a time, in order, always sending the latest menu.
+    menuChain = menuChain.then(() => api("/menu-state", window.mcaMenuNow?.() || st, "PUT"))
+      .then(() => { menuEditAt = Date.now(); })
+      .catch(error => window.mcaToast?.(esc(L(`Menu not saved to the website: ${error.message}`, `菜单未同步到网站：${error.message}`))));
+  }
+
   // ---------- Refresh loop ----------
   async function refresh() {
     if (state.refreshing) return;
@@ -140,6 +162,7 @@
       if (!state.current && threads.length) state.current = threads[0].id;
       await refreshMessages();
       announce();
+      if (menuTick++ % 10 === 0) await loadMenu();
     } catch (error) {
       state.error = error.message;
       if (error.status === 401 || error.status === 403 || error.status === 503) { state.authorized = false; state.orders = []; state.conversations = []; state.messages = []; state.current = null; }
@@ -160,7 +183,9 @@
       document.getElementById("staffReplyState").textContent = "";
       renderChat();
       try { await refreshMessages(); } catch (error) { state.error = error.message; }
-      renderChat(); return;
+      renderChat();
+      if (window.innerWidth < 760) document.getElementById("staffMessages")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
     }
     const advance = event.target.closest("[data-advance]");
     if (advance) {
@@ -171,7 +196,8 @@
   });
   document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setTimeout(() => { renderBar(); renderChat(); }, 220)));
 
-  window.mcaLive = { renderBar, renderChat, refresh };
+  window.mcaLive = { renderBar, renderChat, refresh, saveMenu };
+  void loadMenu();
   publishOrders();
   renderBar(); renderChat();
   void refresh();

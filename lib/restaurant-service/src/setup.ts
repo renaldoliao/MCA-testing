@@ -63,6 +63,8 @@ export function ensureTables(): Promise<void> {
       await client.query("SELECT pg_advisory_xact_lock(18010001)");
       const { rows } = await client.query("SELECT to_regclass('public.mca_submitted_orders') AS t");
       if (!rows[0]?.t) await client.query(TABLES);
+      // Added later: the owner's menu changes (sold out, new dishes), shared with the website.
+      await client.query("CREATE TABLE IF NOT EXISTS mca_menu_state (id text PRIMARY KEY, state jsonb NOT NULL, updated_at timestamp with time zone DEFAULT now() NOT NULL)");
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);

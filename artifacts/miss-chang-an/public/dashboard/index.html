@@ -703,7 +703,8 @@ html { scroll-behavior: smooth; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* Live website orders and chat (live.js), drawn in the dashboard's own style */
 .live-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 12px 14px 12px 18px; border: 1px solid var(--line); border-radius: 16px; background: #fffaf2; }
-.live-bar p { margin: 0; color: var(--muted); font-size: 14px; display: inline-flex; align-items: center; gap: 9px; }
+.live-bar p { margin: 0; color: var(--muted); font-size: 14px; flex: 1 1 260px; }
+.live-bar .live-dot { display: inline-block; margin-right: 8px; vertical-align: 1px; }
 .live-bar p b { color: var(--ink); }
 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
 .live-bar.on .live-dot { background: #2f8a4c; animation: pulse 1.8s infinite; }
@@ -732,6 +733,7 @@ html { scroll-behavior: smooth; }
 .live-chat .chat-quick button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .live-chat .chat-quick button[aria-pressed="true"] span { color: rgba(247,239,226,.7); }
 .live-chat .chat-quick p { margin: 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 760px) { .live-chat .chat-quick { order: -1; } .live-chat .chat-thread { max-height: 60vh; } }
 .needs-reply { justify-self: start; font-style: normal; font-size: 11px; font-weight: 800; color: var(--bg); background: var(--red); border-radius: 10px; padding: 2px 8px; }
 </style>
 </head>
@@ -1036,7 +1038,10 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       for (let i = d.orders.length - 1; i >= 0; i--) if (d.orders[i].web) d.orders.splice(i, 1);
     }
     for (const order of readCustomerOrders()) {
-      const target = BY_KEY[key(order.date)] || DAYS[DAYS.length - 1];
+      // Orders older than the board's history are skipped; anything newer than the last day counts as today.
+      const target = BY_KEY[key(order.date)] || (order.date > DAYS[DAYS.length - 1].dt ? DAYS[DAYS.length - 1] : null);
+      if (!target) continue;
+      if (target.closed) target.closed = false; // a website order on a closed day still shows
       target.orders.push(order);
       for (const item of order.items) BY_ID[item.id] = { id: item.id, en: item.name, zh: item.chinese, price: item.price, w: 0, drink: false };
     }
@@ -1353,11 +1358,23 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
   const CATS = SITE.categories.map(c => [c.id, c.character]);
   const STATE_KEY = "mca-menu-state"; // the website reads this same key, so changes show up there straight away
   function loadState() { try { const x = JSON.parse(localStorage.getItem(STATE_KEY) || "{}"); return { off: x.off || [], added: x.added || [] }; } catch (_) { return { off: [], added: [] }; } }
-  function saveState() { try { localStorage.setItem(STATE_KEY, JSON.stringify({ off: DISH.filter(d => d.off).map(d => d.id), added: DISH.filter(d => d.custom).map(d => ({ id: d.id, name: d.en, chinese: d.zh, price: d.price, cat: d.cat })) })); } catch (_) {} }
+  function menuNow() { return { off: DISH.filter(d => d.off).map(d => d.id), added: DISH.filter(d => d.custom).map(d => ({ id: d.id, name: d.en, chinese: d.zh, price: d.price, cat: d.cat })) }; }
+  function saveState() { const st = menuNow(); try { localStorage.setItem(STATE_KEY, JSON.stringify(st)); } catch (_) {} window.mcaLive?.saveMenu?.(st); }
   const PHOTO = { "chili-oil-splashed-noodles": "/images/chili-oil-noodles.webp", "cumin-lamb-roujiamo": "/images/cumin-lamb-roujiamo.webp", "xi-an-lamb-bread-soup": "/images/lamb-bread-soup.webp", "soup-dumplings-6": "/images/soup-dumplings.webp" };
   const saved = loadState();
   const DISH = saved.added.map(x => ({ id: x.id, en: x.name, zh: x.chinese || "", price: +x.price, cat: x.cat, off: saved.off.includes(x.id), photo: null, custom: true }))
     .concat(MENU.map(m => ({ id: m.id, en: m.en, zh: m.zh, price: m.price, cat: m.cat, off: saved.off.includes(m.id), photo: PHOTO[m.id] || null })));
+  // Live menu from the shared database (live.js): replaces this browser's copy.
+  window.mcaApplyMenu = st => {
+    if (!st || !Array.isArray(st.off) || !Array.isArray(st.added)) return;
+    if (JSON.stringify(st) === JSON.stringify(menuNow())) return;
+    try { localStorage.setItem(STATE_KEY, JSON.stringify(st)); } catch (_) {}
+    for (let i = DISH.length - 1; i >= 0; i--) if (DISH[i].custom) DISH.splice(i, 1);
+    DISH.forEach(d => { d.off = st.off.includes(d.id); });
+    DISH.unshift(...st.added.map(x => ({ id: x.id, en: x.name, zh: x.chinese || "", price: +x.price, cat: x.cat, off: st.off.includes(x.id), photo: null, custom: true })));
+    if (modal.hidden) renderMenu();
+  };
+  window.mcaMenuNow = menuNow;
   let mcat = "all", mq = "";
   const ICON_CAM = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.4h6.8L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>';
   const ICON_PEN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>';

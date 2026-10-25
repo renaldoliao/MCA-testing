@@ -13,6 +13,23 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const menu = new Map(catalog.categories.flatMap(category => category.items).map(item => [
   item.id, { name: item.name, chinese: "chinese" in item ? item.chinese : "", unitCents: Math.round(Number(item.price.replace(/[^0-9.]/g, "")) * 100), from: /^from/i.test(item.price) },
 ]));
+const CATEGORY_IDS = new Set(catalog.categories.map(category => category.id));
+type MenuState = { off: string[]; added: { id: string; name: string; chinese: string; price: number; cat: string }[] };
+async function readMenuState(): Promise<MenuState> {
+  const result = await db.execute(sql`SELECT state FROM mca_menu_state WHERE id = 'main'`);
+  const state = (result.rows[0] as { state?: Partial<MenuState> } | undefined)?.state;
+  return { off: Array.isArray(state?.off) ? state.off : [], added: Array.isArray(state?.added) ? state.added : [] };
+}
+function cleanMenuState(input: unknown): MenuState | null {
+  const value = input as Partial<MenuState> | null;
+  if (!value || !Array.isArray(value.off) || !Array.isArray(value.added) || value.off.length > 300 || value.added.length > 60) return null;
+  const text = (v: unknown, max: number) => typeof v === "string" ? v.trim().slice(0, max) : "";
+  const off = [...new Set(value.off.map(id => text(id, 80)).filter(Boolean))];
+  const added = value.added.map(item => ({ id: text(item?.id, 80), name: text(item?.name, 60), chinese: text(item?.chinese, 30),
+    price: Math.round(Math.min(1000, Math.max(0, Number(item?.price) || 0)) * 100) / 100, cat: text(item?.cat, 40) }))
+    .filter(item => /^new-[a-z0-9]+$/.test(item.id) && item.name && CATEGORY_IDS.has(item.cat));
+  return { off, added };
+}
 function fail(res: Response, status: number, error: string): void { res.status(status).json({ error }); }
 function customerToken(req: Request): string {
   const token = req.headers.cookie?.split(";").map(part => part.trim()).find(part => part.startsWith(COOKIE + "="))?.slice(COOKIE.length + 1);
@@ -125,8 +142,14 @@ router.post("/customer/orders", async (req, res): Promise<void> => {
   if (new Set(input.items.map(item => item.id)).size !== input.items.length || input.items.reduce((n, item) => n + item.quantity, 0) > 100) {
     fail(res, 400, "Use unique dishes and no more than 100 items."); return;
   }
-  const items = input.items.map(item => ({ id: item.id, quantity: item.quantity, ...menu.get(item.id) }));
+  // Today's menu: the published menu plus dishes the owner added, minus anything marked sold out.
+  const menuState = await readMenuState();
+  const todays = new Map(menu);
+  for (const dish of menuState.added) todays.set(dish.id, { name: dish.name, chinese: dish.chinese, unitCents: Math.round(dish.price * 100), from: false });
+  const items = input.items.map(item => ({ id: item.id, quantity: item.quantity, ...todays.get(item.id) }));
   if (items.some(item => !item.name || item.unitCents === undefined)) { fail(res, 400, "A dish is not in the published menu. Refresh the menu before submitting."); return; }
+  const soldOut = items.find(item => menuState.off.includes(item.id));
+  if (soldOut) { fail(res, 409, `Sorry, ${soldOut.name} just sold out. Remove it and submit again.`); return; }
   if (!await allow(`orders:${res.locals.customerId}`, 30)) { fail(res, 429, "Too many submissions. Try again later."); return; }
   const [created] = await db.insert(submittedOrders).values({
     id: randomUUID(), customerId: res.locals.customerId, requestId: input.requestId, fingerprint,
@@ -171,12 +194,19 @@ router.post("/staff-login", async (req, res): Promise<void> => {
   res.cookie(STAFF_COOKIE, `${expires}.${staffSign(expires)}`, { httpOnly: true, secure: req.secure, sameSite: "lax", path: "/api", expires: new Date(expires) });
   res.json({ authorized: true });
 });
+router.get("/menu-state", async (_req, res): Promise<void> => { res.json(await readMenuState()); });
 router.post("/staff-logout", (_req, res) => {
   res.clearCookie(STAFF_COOKIE, { path: "/api" });
   res.json({ authorized: false });
 });
 router.use("/staff", requireStaff);
 router.get("/staff/session", (_req, res) => { res.json({ authorized: true }); });
+router.put("/staff/menu-state", async (req, res): Promise<void> => {
+  const state = cleanMenuState(req.body);
+  if (!state) { fail(res, 400, "Invalid menu update."); return; }
+  await db.execute(sql`INSERT INTO mca_menu_state (id, state, updated_at) VALUES ('main', ${JSON.stringify(state)}::jsonb, now()) ON CONFLICT (id) DO UPDATE SET state = EXCLUDED.state, updated_at = now()`);
+  res.json(state);
+});
 router.get("/staff/orders", async (_req, res): Promise<void> => {
   const rows = await db.select().from(submittedOrders).orderBy(desc(submittedOrders.createdAt)).limit(100);
   res.json(rows.map(orderResponse));

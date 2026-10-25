@@ -51869,6 +51869,26 @@ var menu = new Map(menu_default.categories.flatMap((category) => category.items)
   item.id,
   { name: item.name, chinese: "chinese" in item ? item.chinese : "", unitCents: Math.round(Number(item.price.replace(/[^0-9.]/g, "")) * 100), from: /^from/i.test(item.price) }
 ]));
+var CATEGORY_IDS = new Set(menu_default.categories.map((category) => category.id));
+async function readMenuState() {
+  const result = await db.execute(sql`SELECT state FROM mca_menu_state WHERE id = 'main'`);
+  const state = result.rows[0]?.state;
+  return { off: Array.isArray(state?.off) ? state.off : [], added: Array.isArray(state?.added) ? state.added : [] };
+}
+function cleanMenuState(input) {
+  const value = input;
+  if (!value || !Array.isArray(value.off) || !Array.isArray(value.added) || value.off.length > 300 || value.added.length > 60) return null;
+  const text2 = (v, max) => typeof v === "string" ? v.trim().slice(0, max) : "";
+  const off = [...new Set(value.off.map((id) => text2(id, 80)).filter(Boolean))];
+  const added = value.added.map((item) => ({
+    id: text2(item?.id, 80),
+    name: text2(item?.name, 60),
+    chinese: text2(item?.chinese, 30),
+    price: Math.round(Math.min(1e3, Math.max(0, Number(item?.price) || 0)) * 100) / 100,
+    cat: text2(item?.cat, 40)
+  })).filter((item) => /^new-[a-z0-9]+$/.test(item.id) && item.name && CATEGORY_IDS.has(item.cat));
+  return { off, added };
+}
 function fail(res, status, error40) {
   res.status(status).json({ error: error40 });
 }
@@ -52014,9 +52034,17 @@ router.post("/customer/orders", async (req, res) => {
     fail(res, 400, "Use unique dishes and no more than 100 items.");
     return;
   }
-  const items = input.items.map((item) => ({ id: item.id, quantity: item.quantity, ...menu.get(item.id) }));
+  const menuState = await readMenuState();
+  const todays = new Map(menu);
+  for (const dish of menuState.added) todays.set(dish.id, { name: dish.name, chinese: dish.chinese, unitCents: Math.round(dish.price * 100), from: false });
+  const items = input.items.map((item) => ({ id: item.id, quantity: item.quantity, ...todays.get(item.id) }));
   if (items.some((item) => !item.name || item.unitCents === void 0)) {
     fail(res, 400, "A dish is not in the published menu. Refresh the menu before submitting.");
+    return;
+  }
+  const soldOut = items.find((item) => menuState.off.includes(item.id));
+  if (soldOut) {
+    fail(res, 409, `Sorry, ${soldOut.name} just sold out. Remove it and submit again.`);
     return;
   }
   if (!await allow(`orders:${res.locals.customerId}`, 30)) {
@@ -52094,6 +52122,9 @@ router.post("/staff-login", async (req, res) => {
   res.cookie(STAFF_COOKIE, `${expires}.${staffSign(expires)}`, { httpOnly: true, secure: req.secure, sameSite: "lax", path: "/api", expires: new Date(expires) });
   res.json({ authorized: true });
 });
+router.get("/menu-state", async (_req, res) => {
+  res.json(await readMenuState());
+});
 router.post("/staff-logout", (_req, res) => {
   res.clearCookie(STAFF_COOKIE, { path: "/api" });
   res.json({ authorized: false });
@@ -52101,6 +52132,15 @@ router.post("/staff-logout", (_req, res) => {
 router.use("/staff", requireStaff);
 router.get("/staff/session", (_req, res) => {
   res.json({ authorized: true });
+});
+router.put("/staff/menu-state", async (req, res) => {
+  const state = cleanMenuState(req.body);
+  if (!state) {
+    fail(res, 400, "Invalid menu update.");
+    return;
+  }
+  await db.execute(sql`INSERT INTO mca_menu_state (id, state, updated_at) VALUES ('main', ${JSON.stringify(state)}::jsonb, now()) ON CONFLICT (id) DO UPDATE SET state = EXCLUDED.state, updated_at = now()`);
+  res.json(state);
 });
 router.get("/staff/orders", async (_req, res) => {
   const rows = await db.select().from(submittedOrders).orderBy(desc(submittedOrders.createdAt)).limit(100);
@@ -52221,6 +52261,7 @@ function ensureTables() {
       await client.query("SELECT pg_advisory_xact_lock(18010001)");
       const { rows } = await client.query("SELECT to_regclass('public.mca_submitted_orders') AS t");
       if (!rows[0]?.t) await client.query(TABLES);
+      await client.query("CREATE TABLE IF NOT EXISTS mca_menu_state (id text PRIMARY KEY, state jsonb NOT NULL, updated_at timestamp with time zone DEFAULT now() NOT NULL)");
       await client.query("COMMIT");
     } catch (error40) {
       await client.query("ROLLBACK").catch(() => void 0);
