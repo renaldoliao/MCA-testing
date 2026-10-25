@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Miss Chang An"
+description = "A responsive restaurant website for Miss Chang An in Troy, Michigan, with its menu, visit details, ordering link, and legal pages rebuilt from the supplied HTML archive."
+version = "1.0.0"
+id = "artifacts/miss-chang-an"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22358
+
+[services.development]
+run = "pnpm --filter @workspace/miss-chang-an run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/miss-chang-an", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/miss-chang-an/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22358"
+BASE_PATH = "/"

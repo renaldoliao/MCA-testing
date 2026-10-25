@@ -1,0 +1,4 @@
+- [Pickup ordering](ordering-scope.md) — Live pay-at-pickup orders should sync to a staff-only dashboard; keep phone CTAs out of the order flow.
+- [Motion direction](motion-direction.md) — Keep customer-site and staff-dashboard animation polished, brief, purposeful, and reduced-motion aware.
+- [Responsive verification](responsive-verification.md) — Batch large viewport audits by route and bound browser runs to avoid long waits for completed checks.
+- [GitHub export constraints](github-export-constraints.md) — Connector API access does not authorize Git CLI; snapshot exports must preserve remote history and verify file hashes.

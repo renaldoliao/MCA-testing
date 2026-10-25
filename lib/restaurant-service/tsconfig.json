@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "noEmit": true, "resolveJsonModule": true, "types": ["node"] },
+  "include": ["src"],
+  "references": [{ "path": "../db" }, { "path": "../api-zod" }]
+}

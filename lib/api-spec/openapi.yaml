@@ -1,0 +1,221 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /customer/session:
+    post:
+      operationId: establishCustomerSession
+      summary: Establish a private customer browser session
+      responses:
+        "200": { description: Session cookie established }
+  /customer/orders:
+    get:
+      operationId: listCustomerOrders
+      summary: List only this customer's shared review submissions
+      responses:
+        "200":
+          description: Customer order history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SubmittedOrder" }
+    post:
+      operationId: submitCustomerOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderInput" }
+      responses:
+        "200":
+          description: Saved order, or the original result of an identical retry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubmittedOrder" }
+  /customer/messages:
+    get:
+      operationId: listCustomerMessages
+      responses:
+        "200":
+          description: Only this customer's conversation history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChatMessage" }
+    post:
+      operationId: sendCustomerMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MessageInput" }
+      responses:
+        "200":
+          description: Saved customer message
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatMessage" }
+  /staff/session:
+    get:
+      operationId: getStaffSession
+      responses:
+        "200": { description: Authenticated and authorized staff member }
+        "401": { description: Sign-in required }
+        "403": { description: Staff membership required }
+  /staff/orders:
+    get:
+      operationId: listStaffOrders
+      responses:
+        "200":
+          description: Submitted review orders, never generated samples
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SubmittedOrder" }
+  /staff/orders/{id}:
+    patch:
+      operationId: updateStaffOrder
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderUpdate" }
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubmittedOrder" }
+  /staff/conversations:
+    get:
+      operationId: listStaffConversations
+      responses:
+        "200":
+          description: Private staff conversation list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Conversation" }
+  /staff/conversations/{id}/messages:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      operationId: listStaffMessages
+      responses:
+        "200":
+          description: Private conversation history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChatMessage" }
+    post:
+      operationId: sendStaffMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MessageInput" }
+      responses:
+        "200":
+          description: Saved staff reply
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatMessage" }
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    OrderInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, name, phone, notes, items]
+      properties:
+        requestId: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 80 }
+        phone: { type: string, maxLength: 30 }
+        notes: { type: string, maxLength: 1000 }
+        items:
+          type: array
+          minItems: 1
+          maxItems: 30
+          items: { $ref: "#/components/schemas/OrderLineInput" }
+    OrderLineInput:
+      type: object
+      additionalProperties: false
+      required: [id, quantity]
+      properties:
+        id: { type: string, minLength: 1, maxLength: 100 }
+        quantity: { type: integer, minimum: 1, maximum: 20 }
+    MessageInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, body]
+      properties:
+        requestId: { type: string, format: uuid }
+        body: { type: string, minLength: 1, maxLength: 2000 }
+    OrderUpdate:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: { type: string, enum: [new, preparing, ready, complete] }
+    SubmittedOrder:
+      type: object
+      required: [id, details, totalCents, status, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        details: { type: object, additionalProperties: true }
+        totalCents: { type: integer }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ChatMessage:
+      type: object
+      required: [id, role, body, createdAt]
+      properties:
+        id: { type: string }
+        role: { type: string, enum: [customer, staff] }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+    Conversation:
+      type: object
+      required: [id, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+

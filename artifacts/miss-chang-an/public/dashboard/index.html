@@ -1,0 +1,1525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Miss Chang An Back Office</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23b3221a'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%23f7efe2' font-family='serif'%3E%E5%BF%B5%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Noto+Serif+SC:wght@500;600&display=swap">
+<style>
+/* Same paper, ink and red as the Miss Chang An website. Tabs use a shared animated indicator and clear demo data. */
+:root {
+  color-scheme: light;
+  --bg: #fff3d9;
+  --ink: #2e1712;
+  --muted: #6a4d42;
+  --faint: #a08575;
+  --line: #dcc79c;
+  --soft: #f7e6c0;
+  --red: #ad3b27;
+  --red-soft: #f6d6c4;
+  --font-display: "Libre Baskerville", Georgia, serif;
+  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-brush: "Noto Serif SC", "Songti SC", serif;
+  --font-zh: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --spring: cubic-bezier(.34, 1.45, .64, 1);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+html[lang="zh"] body { font-family: var(--font-body), var(--font-zh); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; border-radius: 6px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+
+/* Header */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); transition: box-shadow .35s var(--ease); }
+.top.scrolled { box-shadow: 0 10px 30px -18px rgba(0,0,0,.28); }
+.top-row { display: flex; align-items: center; gap: 14px; padding-block: 14px 10px; }
+.seal { transition: transform .5s var(--spring); }
+.seal:hover { transform: rotate(-6deg) scale(1.04); }
+.seal { width: 42px; height: 42px; border-radius: 8px; background: var(--ink); color: var(--bg); flex: none; display: grid; place-items: center; font-family: var(--font-brush); font-size: 30px; line-height: 1; }
+.brand { margin-right: auto; min-width: 0; }
+.brand-name { font-family: var(--font-display); font-weight: 900; font-size: 20px; line-height: 1.1; letter-spacing: -0.01em; }
+.brand-name .bz { font-family: var(--font-brush); font-weight: 400; color: var(--red); font-size: 22px; margin-left: 6px; }
+.brand-sub { font-size: 14px; color: var(--muted); }
+.sample-badge { display: inline-flex; margin-top: 3px; color: var(--red); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+
+.seg { display: inline-flex; background: var(--soft); border-radius: 22px; padding: 3px; flex: none; position: relative; isolation: isolate; }
+.seg-thumb { position: absolute; top: 3px; bottom: 3px; left: 0; border-radius: 19px; background: var(--ink); z-index: -1; transition: transform .34s cubic-bezier(.22,.9,.25,1), width .34s cubic-bezier(.22,.9,.25,1); box-shadow: 0 4px 12px -4px rgba(0,0,0,.35); }
+.seg button { border: 0; background: none; border-radius: 19px; padding: 6px 12px; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--muted); white-space: nowrap; transition: color .3s var(--ease), transform .2s var(--spring); }
+.seg button[aria-pressed="true"] { color: var(--bg); }
+.seg button:active { transform: scale(.965); }
+
+.tabs { display: flex; gap: 28px; overflow-x: auto; scrollbar-width: none; position: relative; }
+.tab { border: 0; background: none; cursor: pointer; font-weight: 700; font-size: 17px; padding: 8px 0 12px; color: var(--muted); white-space: nowrap; position: relative; transition: color .3s var(--ease), transform .2s var(--spring); }
+.tab:hover, .tab[aria-selected="true"] { color: var(--ink); }
+.tab:active { transform: translateY(1px) scale(.97); }
+.tab-ink { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: var(--ink); border-radius: 3px 3px 0 0; transition: transform .36s cubic-bezier(.22,.9,.25,1), width .36s cubic-bezier(.22,.9,.25,1); pointer-events: none; }
+.tab .dot-new { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--red); margin-left: 6px; vertical-align: 3px; }
+
+main { padding-block: 28px 72px; }
+[role="tabpanel"] { display: grid; gap: 32px; grid-template-columns: minmax(0, 1fr); }
+[role="tabpanel"] > * { min-width: 0; }
+.note { margin: 0; font-size: 14px; color: var(--muted); }
+main { transition: opacity .18s var(--ease); }
+body.swapping main, body.swapping .tabs { opacity: .72; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes inR { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+@keyframes inL { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes grow { from { transform: scaleY(0); } to { transform: none; } }
+@keyframes growX { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(179,34,26,.45); } 70% { box-shadow: 0 0 0 7px rgba(179,34,26,0); } 100% { box-shadow: 0 0 0 0 rgba(179,34,26,0); } }
+[role="tabpanel"].enter > * { animation: rise .38s var(--ease) both; animation-delay: calc(var(--i, 0) * 34ms); }
+[role="tabpanel"].enter.from-r > * { animation-name: inR; }
+[role="tabpanel"].enter.from-l > * { animation-name: inL; }
+
+/* The numbers */
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.kpi { display: grid; gap: 2px; min-width: 0; }
+.k-label { font-size: 15px; color: var(--muted); }
+.k-value { font-family: var(--font-display); font-weight: 900; font-size: clamp(40px, 8vw, 64px); line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
+.k-value.red { color: var(--red); }
+.k-note { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.k-note b { color: var(--ink); font-weight: 700; }
+
+/* Orders list */
+.list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+.list-head h2 { margin: 0; font-family: var(--font-display); font-weight: 900; font-size: 22px; }
+.orders { list-style: none; margin: 0; padding: 0; }
+.demo-order-board { padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: #fffaf0; box-shadow: 0 12px 28px -24px rgba(46,23,18,.5); }
+.demo-order-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+.demo-order-head h2 { margin: 0; font: 700 20px/1.25 var(--font-display); }
+.demo-order-label { color: var(--red); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.demo-order-empty { margin: 0; color: var(--muted); }
+.demo-order-list { display: grid; gap: 10px; }
+.demo-order-card { display: grid; grid-template-columns: minmax(120px, .7fr) minmax(220px, 1.8fr) auto; gap: 10px 18px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: white; animation: rise .35s var(--ease) both; }
+.demo-order-customer { font-weight: 800; }
+.demo-order-meta, .demo-order-items, .demo-order-notes { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.demo-order-total { font-weight: 800; white-space: nowrap; text-align: right; }
+.order.website-demo { background: #fffaf0; border-left: 3px solid var(--red); padding-left: 14px; }
+.website-order-tag { display: inline-block; margin-left: 8px; font-size: 10px; color: var(--red); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.o-customer-note { display: block; margin-top: 5px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+@media (max-width: 640px) { .demo-order-card { grid-template-columns: 1fr auto; } .demo-order-items, .demo-order-notes { grid-column: 1/-1; } }
+.order { display: grid; grid-template-columns: 5.2em minmax(0, 1fr) auto auto; gap: 4px 18px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.order.fresh { animation: arrive .7s ease-out; }
+@keyframes arrive { 0% { background: var(--red-soft); } 100% { background: transparent; } }
+.o-time { font-family: var(--font-mono); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+.o-who { min-width: 0; }
+.o-name { font-weight: 700; }
+.o-type { font-size: 14px; color: var(--muted); margin-left: 8px; }
+.o-items { display: block; font-size: 14px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.o-total { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.status { font-size: 14px; font-weight: 700; padding: 4px 12px; border-radius: 14px; white-space: nowrap; min-width: 7.4em; text-align: center; }
+.status.done { background: var(--soft); color: var(--muted); }
+.status.wait { background: var(--red); color: var(--bg); }
+.status.later { background: var(--red-soft); color: var(--red); }
+/* Week strip */
+.strip-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.hint { font-size: 14px; color: var(--muted); }
+.strip { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; padding: 4px 2px 14px; scrollbar-width: thin; }
+.col { flex: 0 0 236px; scroll-snap-align: start; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); text-align: left; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 12px; min-height: 360px; transition: border-color .3s var(--ease), box-shadow .4s var(--ease), transform .3s var(--spring); }
+.col[data-k]:hover { border-color: var(--ink); box-shadow: 0 18px 40px -26px rgba(0,0,0,.35); transform: translateY(-3px); }
+.col[data-k]:active { transform: translateY(-1px) scale(.985); }
+.col.today { border: 2px solid var(--ink); }
+.col.closed { flex-basis: 128px; cursor: default; background: repeating-linear-gradient(135deg, var(--bg) 0 8px, var(--soft) 8px 9px); }
+.col.closed:hover { border-color: var(--line); }
+.c-head { display: grid; gap: 2px; }
+.c-day { display: flex; align-items: baseline; gap: 6px; }
+.c-day small { font-size: 14px; color: var(--muted); }
+.c-day .num { font-family: var(--font-display); font-weight: 900; font-size: 26px; line-height: 1; }
+.c-day .flag { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--red); display: inline-flex; align-items: center; gap: 6px; }
+.c-day .flag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: pulse 2s infinite; }
+.c-sum { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.c-sum b { color: var(--ink); font-family: var(--font-display); font-weight: 900; font-size: 18px; }
+.cards { display: flex; flex-direction: column; gap: 8px; }
+.card { background: var(--soft); border-radius: 10px; padding: 9px 11px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; font-size: 14px; }
+.card .c-time { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.card .c-st { font-size: 12px; font-weight: 700; color: var(--muted); text-align: right; white-space: nowrap; }
+.card .c-name { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .c-total { font-family: var(--font-mono); font-weight: 600; text-align: right; }
+.card .c-type { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+.card.wait { background: var(--bg); box-shadow: inset 0 0 0 2px var(--red); }
+.card.wait .c-st { color: var(--red); display: inline-flex; align-items: center; gap: 5px; justify-content: flex-end; }
+.card.wait .c-st::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: pulse 1.8s infinite; }
+.card { transition: transform .3s var(--spring), background-color .3s; }
+.col[data-k]:hover .card { transform: translateX(2px); }
+.card.later { background: var(--red-soft); }
+.card.later .c-st { color: var(--red); }
+.card.fresh { animation: arrive 2.4s ease-out; }
+.c-empty { color: var(--faint); font-size: 14px; }
+.c-open { margin-top: auto; font-size: 14px; font-weight: 700; color: var(--muted); transition: color .3s var(--ease), letter-spacing .4s var(--ease); }
+.col[data-k]:hover .c-open { color: var(--ink); letter-spacing: .02em; }
+.strip.enter .col { animation: rise .4s var(--ease) both; animation-delay: calc(var(--i) * 30ms); }
+.strip.enter .card { animation: rise .32s var(--ease) both; animation-delay: calc(var(--i) * 30ms + var(--j) * 16ms + 55ms); }
+.strip.from-r .col { animation: inR .34s var(--ease) both; animation-delay: calc(var(--i) * 26ms); }
+.strip.from-l .col { animation: inL .34s var(--ease) both; animation-delay: calc((6 - var(--i)) * 26ms); }
+.strip.fade { animation: fadeIn .26s var(--ease) both; }
+.strip { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fl, 0px), #000 calc(100% - var(--fr, 0px)), transparent 100%); mask-image: linear-gradient(to right, transparent 0, #000 var(--fl, 0px), #000 calc(100% - var(--fr, 0px)), transparent 100%); }
+.ghost { position: fixed; z-index: 30; background: var(--bg); border: 2px solid var(--ink); border-radius: 0; overflow: hidden; pointer-events: none; box-shadow: 0 30px 60px -30px rgba(0,0,0,.4); }
+.ghost > * { width: var(--gw); }
+
+/* Zoomed day */
+.zoom { display: grid; gap: 28px; }
+.zoom.enter > * { animation: rise .36s var(--ease) both; animation-delay: calc(70ms + var(--i, 0) * 36ms); }
+.zoom.enter .order { animation: rise .32s var(--ease) both; animation-delay: calc(120ms + var(--j, 0) * 24ms); }
+.zoom.from-r .order, .zoom.from-r .kpis { animation: inR .34s var(--ease) both; animation-delay: calc(var(--j, 0) * 24ms); }
+.zoom.from-l .order, .zoom.from-l .kpis { animation: inL .34s var(--ease) both; animation-delay: calc(var(--j, 0) * 24ms); }
+.zoom-head h2 { transition: opacity .3s; }
+.zoom-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.zoom-head h2 { margin: 0 auto 0 0; font-family: var(--font-display); font-weight: 900; font-size: 28px; letter-spacing: -0.01em; }
+.back { border: 0; background: var(--soft); border-radius: 20px; padding: 8px 16px; font-weight: 700; font-size: 15px; cursor: pointer; transition: background-color .25s var(--ease), color .25s, transform .25s var(--spring); }
+.back:hover { background: var(--ink); color: var(--bg); }
+.back:active { transform: scale(.92); }
+.zoom .o-items { white-space: normal; }
+.zoom .orders { border-top: 2px solid var(--ink); }
+.more { background: none; border: 0; padding: 14px 0 0; cursor: pointer; font-size: 16px; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--faint); }
+.more:hover { text-decoration-color: var(--red); }
+
+/* Sales */
+.weeknav { display: flex; align-items: center; gap: 8px; }
+.arrow { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--soft); cursor: pointer; font-size: 18px; font-weight: 700; display: grid; place-items: center; transition: background-color .25s var(--ease), transform .25s var(--spring), opacity .3s; }
+.arrow:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
+.arrow:active:not(:disabled) { transform: scale(.86); }
+.arrow:disabled { opacity: .3; cursor: default; }
+.wk-label { font-weight: 700; font-size: 18px; min-width: 8.5em; text-align: center; }
+
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.day { border: 0; border-right: 1px solid var(--line); background: var(--bg); text-align: left; padding: 12px 12px 12px; cursor: pointer; display: grid; grid-template-rows: auto auto auto 1fr; gap: 2px; min-height: 180px; min-width: 0; transition: background-color .4s var(--ease), color .4s var(--ease); }
+.day:active:not(:disabled) .d-sales { transform: scale(.95); }
+.d-sales { transition: transform .25s var(--spring); display: inline-block; }
+.week.enter .bar { animation: grow .54s var(--ease) both; animation-delay: calc(var(--i) * 28ms + 60ms); }
+.swap > * { animation: rise .32s var(--ease) both; animation-delay: calc(var(--j, 0) * 26ms); }
+.day:last-child { border-right: 0; }
+.day:hover:not(:disabled) { background: var(--soft); }
+.day:disabled { cursor: default; }
+.day[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.day[aria-pressed="true"] .d-meta, .day[aria-pressed="true"] .d-date small { color: rgba(247,239,226,.7); }
+.day[aria-pressed="true"] .bar { background: var(--bg); }
+.day[aria-pressed="true"] .d-flag { color: #f2a28f; }
+.d-date { display: flex; align-items: baseline; gap: 6px; }
+.d-date small { font-size: 13px; color: var(--muted); }
+.d-date .num { font-family: var(--font-display); font-weight: 900; font-size: 22px; line-height: 1; }
+.d-flag { font-size: 12px; font-weight: 700; color: var(--red); min-height: 18px; }
+.d-sales { font-family: var(--font-display); font-weight: 900; font-size: 19px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.d-meta { font-size: 13px; color: var(--muted); }
+.d-off { color: var(--faint); font-size: 14px; align-self: center; }
+.bar-area { display: flex; align-items: flex-end; height: 56px; margin-top: 8px; }
+.bar { width: 100%; background: var(--ink); border-radius: 4px 4px 0 0; transform-origin: bottom; transition: height .5s var(--ease), background-color .4s var(--ease); }
+.day.topday .bar { background: var(--red); }
+.day.closed { background: repeating-linear-gradient(135deg, var(--bg) 0 8px, var(--soft) 8px 9px); }
+
+.daybox { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 36px; align-items: start; }
+.sub-title { margin: 0 0 12px; font-family: var(--font-display); font-weight: 900; font-size: 20px; }
+.daynums { display: grid; gap: 14px; }
+.best { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: rank; }
+.best li { display: grid; grid-template-columns: 1.6em minmax(0, 1fr) auto; gap: 4px 10px; align-items: baseline; counter-increment: rank; }
+.best li::before { content: counter(rank); font-family: var(--font-mono); font-weight: 600; color: var(--muted); font-size: 14px; }
+.best li:first-child::before { color: var(--red); }
+.best .nm { font-weight: 700; min-width: 0; }
+.best .nm small { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 6px; }
+.best .v { font-family: var(--font-mono); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Website */
+.checklist { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
+.checklist li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; padding: 14px 0; border-bottom: 1px solid var(--line); align-items: center; }
+.checklist .what { font-weight: 700; }
+.checklist .why { grid-column: 1; color: var(--muted); font-size: 15px; }
+.chip { grid-column: 2; grid-row: 1 / span 2; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 11px; white-space: nowrap; }
+.chip.live { background: var(--soft); color: var(--ink); }
+.chip.soon { background: var(--red-soft); color: var(--red); }
+.site-link { font-weight: 700; color: var(--red); text-underline-offset: 3px; text-decoration-thickness: 1px; transition: text-underline-offset .3s var(--ease), text-decoration-thickness .3s; }
+.site-link:hover { text-underline-offset: 6px; text-decoration-thickness: 2px; }
+.checklist li { transition: padding .35s var(--ease), background-color .35s; }
+.checklist li:hover { padding-left: 8px; }
+
+.toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 40; background: var(--ink); color: var(--bg); border-radius: 16px; padding: 12px 16px 12px 14px; display: flex; align-items: center; gap: 12px; max-width: calc(100% - 32px); box-shadow: 0 20px 50px -20px rgba(0,0,0,.5); transform: translate(-50%, 110%); opacity: 0; transition: transform .34s cubic-bezier(.22,.9,.25,1), opacity .22s ease; font-size: 15px; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+.toast .t-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex: none; animation: pulse 1.6s infinite; }
+.toast b { font-family: var(--font-mono); }
+
+footer.site { border-top: 1px solid var(--line); padding-block: 18px 30px; color: var(--muted); font-size: 14px; display: flex; gap: 18px; flex-wrap: wrap; }
+
+@media (max-width: 760px) {
+  .daybox { grid-template-columns: 1fr; }
+  .week { grid-template-columns: 1fr; }
+  .day { border-right: 0; border-bottom: 1px solid var(--line); min-height: 0; grid-template-columns: 4.6em minmax(0, 1fr) auto; grid-template-rows: auto auto; gap: 0 12px; align-items: center; padding: 12px 14px; }
+  .day:last-child { border-bottom: 0; }
+  .d-date { grid-column: 1; grid-row: 1 / span 2; flex-direction: column; gap: 0; }
+  .d-flag { grid-column: 2; grid-row: 1; min-height: 0; }
+  .bar-area { grid-column: 2; grid-row: 2; height: 10px; margin: 0; align-items: center; }
+  .bar { height: 10px !important; width: var(--w) !important; border-radius: 0 4px 4px 0; transform-origin: left; }
+  .week.enter .bar { animation-name: growX; }
+  .d-sales { grid-column: 3; grid-row: 1; text-align: right; }
+  .d-meta { grid-column: 3; grid-row: 2; text-align: right; }
+  .d-off { grid-column: 2 / -1; grid-row: 1 / span 2; }
+}
+@media (max-width: 560px) {
+  .col { flex-basis: 78vw; }
+  .col.closed { flex-basis: 34vw; }
+  .zoom-head h2 { font-size: 22px; width: 100%; order: 3; }
+  .brand-name .bz { display: none; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .kpi:first-child { grid-column: 1 / -1; }
+  .order { grid-template-columns: 4.4em minmax(0, 1fr) auto; }
+  .o-total { grid-column: 3; grid-row: 1; }
+  .status { grid-column: 2 / -1; grid-row: 2; justify-self: start; min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* House style from the website: cream paper, ink, one red. Square corners, thin rules, heavy tight type. */
+.marq { background: var(--ink); color: var(--bg); overflow: hidden; white-space: nowrap; font-weight: 800; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; padding: 13px 0; }
+.marq-in { display: inline-flex; animation: marq 40s linear infinite; }
+.marq-in span { flex: none; }
+.marq-in span:nth-child(odd) { color: var(--bg); }
+@keyframes marq { to { transform: translateX(-50%); } }
+.top { border-bottom: 1px solid var(--ink); }
+.seal { background: var(--red); color: var(--bg); border-radius: 2px; }
+.brand-name { font-weight: 900; letter-spacing: -0.035em; font-size: 22px; }
+.brand-sub { font-size: 13px; }
+.seg { border-radius: 0; background: var(--soft); border: 1px solid var(--line); }
+.seg-thumb { border-radius: 0; background: var(--red); box-shadow: none; }
+.seg button { border-radius: 0; font-size: 12px; letter-spacing: .1em; font-weight: 800; }
+.tab { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.tab-ink { background: var(--red); height: 4px; border-radius: 0; }
+.k-label { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.k-value { letter-spacing: -0.045em; font-weight: 900; }
+.k-note { font-size: 14px; }
+.hero { position: relative; isolation: isolate; overflow: hidden; background: var(--red); color: var(--bg); padding: 34px 34px 30px; gap: 22px; }
+.hero::before { content: ""; position: absolute; inset: 8px; border: 1px solid rgba(247,239,226,.4); pointer-events: none; z-index: -1; }
+.hero::after { content: "念"; position: absolute; right: -.04em; bottom: -.3em; z-index: -1; font-family: var(--font-brush); font-size: clamp(170px, 30vw, 300px); line-height: 1; color: rgba(247,239,226,.13); pointer-events: none; }
+.hero .k-label, .hero .k-note { color: rgba(247,239,226,.86); }
+.hero .k-value, .hero .k-note b { color: var(--bg); }
+.hero .k-note b.down { color: #ff6a5c; }
+.hero .k-value.red { color: var(--ink); }
+.list-head { border-bottom: 2px solid var(--ink); }
+.status { border-radius: 2px; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 5px 10px; }
+.status.done { background: var(--soft); color: var(--muted); }
+.col, .week, .card, .chart { border-radius: 0; }
+.col { background: var(--bg); }
+.col.today { border: 2px solid var(--ink); box-shadow: inset 0 4px 0 var(--red); }
+.card { background: var(--soft); }
+.card.wait { background: var(--bg); }
+.arrow { border-radius: 0; background: none; border: 1px solid var(--ink); }
+.arrow:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
+.back { border-radius: 0; background: none; border: 1px solid var(--ink); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.back:hover { background: var(--ink); color: var(--bg); }
+.chip { border-radius: 2px; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 4px 9px; }
+.toast { border-radius: 2px; }
+.week { border-color: var(--line); }
+.day[aria-pressed="true"] { background: var(--ink); }
+.foot { background: var(--ink); color: var(--bg); margin-top: 0; }
+footer.site { border-top: 0; color: rgba(247,239,226,.78); padding-block: 22px 30px; }
+
+/* Charts */
+.chart { border: 1px solid var(--line); background: var(--bg); padding: 22px 22px 18px; min-width: 0; }
+.ch-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.ch-head .sub-title { margin: 0; }
+.legend { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 12px; height: 12px; display: inline-block; background: var(--ink); }
+.legend i + i, .legend span + i { margin-left: 10px; }
+.legend i.ghost-sw { background: #dccbb3; }
+.chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.chart-grid .wide { grid-column: 1 / -1; }
+.dc-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; }
+.dc { border: 0; background: none; padding: 0; cursor: pointer; display: grid; grid-template-rows: 20px 170px auto; gap: 6px; text-align: center; min-width: 0; }
+.dc:disabled { cursor: default; }
+.dc-plot, .hc-plot { position: relative; border-bottom: 2px solid var(--ink); }
+.dc-last { position: absolute; left: 0; right: 0; bottom: 0; background: #dccbb3; }
+.dc-bar, .hc-bar { position: absolute; bottom: 0; background: var(--ink); transform-origin: bottom; animation: grow .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 55ms + 120ms); transition: background-color .3s var(--ease); }
+.dc-bar { left: 20%; right: 20%; }
+.dc.topday .dc-bar, .hc.peak .hc-bar { background: var(--red); }
+.dc:not(:disabled):hover .dc-bar, .hc:hover .hc-bar { background: var(--red); }
+.dc-val { align-self: end; font-weight: 900; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
+.dc-val.off { font-weight: 400; font-size: 12px; color: var(--faint); }
+.dc-lab { font-weight: 800; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; padding: 4px 0; color: var(--muted); transition: background-color .3s var(--ease), color .3s var(--ease); }
+.dc.sel .dc-lab { background: var(--ink); color: var(--bg); }
+.dc.sel .dc-bar { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--ink); }
+.tr-wrap { padding: 0 20px; }
+.tr-plot { position: relative; height: 160px; margin-top: 22px; border-bottom: 2px solid var(--ink); }
+.tr-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; animation: wipe 1.3s var(--ease) both; }
+@keyframes wipe { from { clip-path: inset(-10px 100% -10px -10px); } to { clip-path: inset(-10px -10px -10px -10px); } }
+.tr-area { fill: var(--red); opacity: .16; }
+.tr-line { fill: none; stroke: var(--ink); stroke-width: 2.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.tr-dot { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); border: 0; background: none; padding: 0; cursor: pointer; animation: fadeIn .5s var(--ease) 1s both; }
+.tr-dot::before { content: ""; position: absolute; inset: 12px; border-radius: 50%; background: var(--ink); transition: inset .3s var(--spring), background-color .3s; }
+.tr-dot:hover::before { inset: 9px; background: var(--red); }
+.tr-dot.sel::before { inset: 8px; background: var(--red); box-shadow: 0 0 0 3px var(--bg); }
+.tr-val { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: -4px; font-weight: 900; font-size: 15px; white-space: nowrap; opacity: 0; transition: opacity .25s; pointer-events: none; }
+.tr-dot:hover .tr-val, .tr-dot.sel .tr-val { opacity: 1; }
+.tr-labs { position: relative; height: 24px; margin-top: 8px; }
+.tr-lab { position: absolute; transform: translateX(-50%); font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tr-lab.on { color: var(--ink); font-weight: 800; }
+.hc-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
+.hc { display: grid; grid-template-rows: 18px 120px auto; gap: 4px; text-align: center; min-width: 0; }
+.hc-bar { left: 0; right: 0; }
+.hc-val { align-self: end; font-weight: 800; font-size: 12px; font-variant-numeric: tabular-nums; }
+.hc-lab { font-size: 11px; color: var(--muted); font-weight: 700; padding-top: 3px; white-space: nowrap; }
+.ch-note { margin: 14px 0 0; font-size: 14px; color: var(--muted); }
+.ch-note b { color: var(--ink); }
+.sp-bar { display: flex; height: 34px; margin: 6px 0 16px; overflow: hidden; }
+.sp-bar i { display: block; transform-origin: left; animation: growX .9s var(--ease) both; transition: width .5s var(--ease); }
+.sp-a { background: var(--ink); }
+.sp-b { background: var(--red); animation-delay: .1s !important; }
+.sp-leg { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.sp-leg b { display: block; font-weight: 900; font-size: 26px; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.sp-leg span { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.sp-leg span::before { content: ""; width: 10px; height: 10px; background: var(--ink); }
+.sp-leg div:last-child span::before { background: var(--red); }
+.sp-leg small { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) { .chart-grid { grid-template-columns: 1fr; } .hero { padding: 28px 22px 24px; } }
+@media (max-width: 560px) { .chart { padding: 18px 14px 14px; } .dc-grid { gap: 6px; } .dc-val { font-size: 12px; } .hc-grid { gap: 3px; } .tr-wrap { padding: 0 16px; } }
+
+/* Premium pass: keep the palette, drop the site's poster styling. Soft raised cards, ink summary panel, sentence case. */
+.top { background: rgba(247,239,226,.92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.seal { border-radius: 11px; box-shadow: 0 8px 18px -10px rgba(179,34,26,.8); }
+.brand-name { font-size: 20px; letter-spacing: -0.02em; }
+.seg { border-radius: 22px; border: 0; background: var(--soft); }
+.seg-thumb { border-radius: 19px; }
+.seg button { border-radius: 19px; font-size: 13px; letter-spacing: 0; }
+.tab { font-size: 16px; letter-spacing: 0; text-transform: none; font-weight: 700; }
+.tab-ink { height: 3px; border-radius: 3px 3px 0 0; }
+.k-label, .status, .chip, .back, .dc-lab, .sp-leg span { text-transform: none; letter-spacing: 0; }
+.k-label { font-size: 14px; font-weight: 600; }
+.k-value { font-weight: 800; letter-spacing: -0.04em; }
+.hero { background: var(--ink); color: var(--bg); border-radius: 20px; padding: 30px 32px 28px; box-shadow: 0 30px 60px -34px rgba(29,20,17,.7); }
+.hero::before, .hero::after { content: none; }
+.hero .k-label, .hero .k-note { color: rgba(247,239,226,.66); }
+.hero .k-value.red { color: #ff6a5c; }
+.hero .k-note b { color: var(--bg); }
+.col, .week, .chart { background: #fffaf2; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 1px 0 #fff inset, 0 18px 34px -28px rgba(29,20,17,.35); }
+.week { overflow: hidden; }
+.col { padding: 16px; }
+.col.today { border: 2px solid var(--ink); box-shadow: 0 22px 40px -26px rgba(29,20,17,.5); }
+.col.closed { background: repeating-linear-gradient(135deg, var(--bg) 0 8px, var(--soft) 8px 9px); box-shadow: none; }
+.card { border-radius: 12px; background: var(--soft); }
+.card.wait { background: #fffaf2; }
+.arrow { border-radius: 50%; border: 0; background: var(--soft); }
+.back { border-radius: 20px; border: 0; background: var(--soft); font-size: 15px; font-weight: 700; }
+.status { border-radius: 14px; font-size: 13px; font-weight: 700; padding: 4px 12px; }
+.chip { border-radius: 11px; font-size: 13px; font-weight: 700; padding: 3px 10px; }
+.toast { border-radius: 16px; }
+.ghost { border-radius: 16px; background: #fffaf2; }
+.day { background: #fffaf2; }
+.day[aria-pressed="true"] { background: var(--ink); }
+.chart { padding: 24px 26px 20px; }
+.dc-plot, .hc-plot { border-bottom: 1px solid var(--line); }
+.dc-bar { left: 22%; right: 22%; border-radius: 8px 8px 0 0; }
+.dc-last { border-radius: 8px 8px 0 0; background: #eadcc6; }
+.legend i.ghost-sw { background: #eadcc6; border-radius: 3px; } .legend i { border-radius: 3px; }
+.hc-bar { border-radius: 6px 6px 0 0; }
+.dc-lab { font-size: 13px; font-weight: 700; border-radius: 9px; }
+.dc.sel .dc-bar { box-shadow: none; }
+.dc.sel .dc-lab { background: var(--ink); }
+.tr-plot { border-bottom: 1px solid var(--line); }
+.tr-area { opacity: .12; }
+.sp-bar { border-radius: 10px; height: 30px; gap: 3px; }
+.sp-bar i { border-radius: 8px; }
+.sp-leg span { font-size: 14px; font-weight: 600; }
+.sp-leg span::before { border-radius: 3px; }
+.sp-leg b { font-weight: 800; }
+.foot { background: none; color: var(--muted); border-top: 1px solid var(--line); }
+footer.site { color: var(--muted); }
+@media (max-width: 560px) { .hero { padding: 24px 20px 22px; border-radius: 18px; } .chart { padding: 20px 16px 16px; } }
+
+/* Menu tab */
+.menu-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 28px; align-items: start; }
+.m-main { min-width: 0; display: grid; gap: 18px; }
+.searchbox { position: relative; }
+.searchbox svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.searchbox input { width: 100%; font: inherit; font-size: 16px; padding: 14px 16px 14px 46px; border: 1px solid var(--line); border-radius: 16px; background: #fffaf2; color: var(--ink); box-shadow: 0 14px 30px -26px rgba(29,20,17,.4); transition: border-color .25s, box-shadow .25s; }
+.searchbox input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(179,34,26,.18); }
+.pills { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 4px 2px 10px; }
+.pill { flex: none; display: inline-flex; align-items: center; gap: 9px; border: 0; cursor: pointer; background: #fffaf2; color: var(--ink); border-radius: 26px; padding: 7px 16px 7px 8px; font-weight: 700; font-size: 15px; box-shadow: 0 10px 24px -20px rgba(29,20,17,.5); transition: background-color .3s var(--ease), color .3s var(--ease), transform .25s var(--spring); }
+.pill:active { transform: scale(.94); }
+.pill .pi { width: 30px; height: 30px; border-radius: 50%; background: var(--red-soft); color: var(--red); display: grid; place-items: center; font-family: var(--font-zh); font-weight: 800; font-size: 15px; }
+.pill .pc { color: var(--muted); font-weight: 600; font-size: 13px; transition: color .3s; }
+.pill[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.pill[aria-pressed="true"] .pi { background: var(--red); color: var(--bg); }
+.pill[aria-pressed="true"] .pc { color: rgba(247,239,226,.7); }
+.dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px; }
+.dish { background: #fffaf2; border: 1px solid var(--line); border-radius: 20px; padding: 10px 10px 14px; display: grid; gap: 12px; box-shadow: 0 18px 34px -28px rgba(29,20,17,.35); animation: rise .36s var(--ease) both; animation-delay: calc(var(--j, 0) * 20ms); transition: transform .24s cubic-bezier(.2,1.1,.35,1), box-shadow .22s var(--ease); }
+.dish:hover { transform: translateY(-2px); box-shadow: 0 24px 38px -28px rgba(29,20,17,.42); }
+.ph { position: relative; display: block; aspect-ratio: 1 / 1; border-radius: 14px; background: linear-gradient(160deg, #f3e6d6, #ecd9cb); background-size: cover; background-position: center; cursor: pointer; overflow: hidden; transition: filter .3s, opacity .3s, transform .45s var(--ease); }
+.dish:hover .ph { transform: translateY(-2px); }
+.ph-in { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 6px; color: #a8978a; font-size: 14px; font-weight: 600; transition: color .25s; }
+.ph:hover .ph-in { color: var(--red); }
+.ph .price { position: absolute; left: 10px; bottom: 10px; background: var(--bg); border-radius: 20px; padding: 6px 13px; font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums; box-shadow: 0 8px 18px -10px rgba(29,20,17,.5); }
+.ph .edit { position: absolute; right: 10px; top: 10px; width: 34px; height: 34px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; box-shadow: 0 8px 18px -10px rgba(29,20,17,.5); }
+.d-body { display: grid; gap: 2px; padding: 0 6px; }
+.d-cat { font-size: 13px; color: var(--muted); }
+.d-name { margin: 0; font-weight: 800; font-size: 17px; line-height: 1.25; letter-spacing: -0.01em; }
+.d-alt { font-size: 13px; color: var(--faint); min-height: 1.2em; }
+.d-foot { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.sw { position: relative; width: 46px; height: 28px; border-radius: 14px; border: 0; padding: 0; cursor: pointer; background: var(--ink); flex: none; transition: background-color .3s var(--ease); }
+.sw i { position: absolute; top: 3px; left: 21px; width: 22px; height: 22px; border-radius: 50%; background: var(--bg); transition: left .4s var(--spring); }
+.sw[aria-checked="false"] { background: #cdbfae; }
+.sw[aria-checked="false"] i { left: 3px; }
+.sw:active i { width: 27px; }
+.sw[aria-checked="false"]:active i { left: 3px; }
+.sw[aria-checked="true"]:active i { left: 16px; }
+.sw-l { font-weight: 700; font-size: 15px; }
+.dish.off .ph { filter: grayscale(1); opacity: .55; }
+.dish.off .d-name { color: var(--muted); }
+.dish.off .sw-l { color: var(--red); }
+.m-empty { color: var(--muted); padding: 30px 0; }
+.side-card { position: sticky; top: 132px; background: #fffaf2; border: 1px solid var(--line); border-radius: 22px; padding: 24px; display: grid; gap: 16px; box-shadow: 0 24px 44px -30px rgba(29,20,17,.4); }
+.side-card .big { display: flex; align-items: baseline; gap: 10px; }
+.side-card .big .k-value { font-size: 56px; }
+.side-card .big span:last-child { color: var(--muted); }
+.side-split { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.side-split div { padding: 14px 0; }
+.side-split div + div { padding-left: 18px; border-left: 1px solid var(--line); }
+.side-split b { display: block; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+.side-split span { font-size: 14px; color: var(--muted); }
+.side-card h4 { margin: 0; font-size: 16px; font-weight: 800; }
+.so-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.so-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: 700; font-size: 15px; }
+.so-list button { border: 0; background: var(--soft); border-radius: 14px; padding: 4px 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background-color .25s, color .25s; }
+.so-list button:hover { background: var(--ink); color: var(--bg); }
+.side-card p { margin: 0; color: var(--muted); font-size: 15px; }
+.warn { background: var(--red-soft); color: var(--red); border-radius: 14px; padding: 13px 16px; font-weight: 700; font-size: 15px; }
+.cta { border: 0; cursor: pointer; background: var(--red); color: var(--bg); border-radius: 16px; padding: 16px; font-weight: 800; font-size: 17px; box-shadow: 0 16px 28px -16px rgba(179,34,26,.9); transition: transform .3s var(--spring), box-shadow .3s var(--ease); }
+.cta:hover { transform: translateY(-2px); box-shadow: 0 22px 34px -16px rgba(179,34,26,.9); }
+.cta:active { transform: scale(.97); }
+.side-card .site-link { text-align: center; color: var(--ink); text-decoration: underline; }
+.modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(29,20,17,.5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); animation: fadeIn .18s var(--ease) both; }
+.sheet { width: min(420px, 100%); background: #fffaf2; border-radius: 22px; padding: 26px; display: grid; gap: 14px; box-shadow: 0 40px 80px -30px rgba(29,20,17,.7); animation: rise .28s var(--ease) both; }
+.sheet h3 { margin: 0 0 4px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.sheet label { display: grid; gap: 6px; font-weight: 700; font-size: 14px; }
+.sheet input, .sheet select { font: inherit; font-size: 16px; font-weight: 400; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--ink); }
+.sheet input:focus, .sheet select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(179,34,26,.18); }
+.sheet .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sheet .acts { display: flex; gap: 10px; margin-top: 6px; }
+.sheet .acts .cta { flex: 1; }
+.sheet .ghostbtn { border: 0; background: var(--soft); border-radius: 16px; padding: 16px 20px; font-weight: 700; font-size: 16px; cursor: pointer; }
+@media (max-width: 860px) { .menu-wrap { grid-template-columns: 1fr; } .side-card { position: static; order: -1; padding: 20px; } .side-card .big .k-value { font-size: 46px; } }
+@media (max-width: 560px) { .dish-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .dish { padding: 8px 8px 12px; } .d-name { font-size: 15px; } .price { font-size: 13px; } .sw-l { font-size: 13px; } .d-foot { gap: 8px; } }
+
+/* Finishing touches */
+.ph::before { content: attr(data-ch); position: absolute; right: -6px; top: -18px; font-family: var(--font-zh); font-weight: 800; font-size: 120px; line-height: 1; color: rgba(179,34,26,.07); pointer-events: none; }
+.ph.has::before { content: none; }
+.dish .ph .price { transition: transform .35s var(--spring); }
+.dish:hover .ph .price { transform: translateY(-2px); }
+.hero .k-value { text-shadow: 0 1px 0 rgba(0,0,0,.2); }
+.top-row .seal { transition: transform .5s var(--spring), box-shadow .3s; }
+.col, .chart, .week, .dish, .side-card { backdrop-filter: none; }
+::selection { background: var(--red); color: var(--bg); }
+html { scroll-behavior: smooth; }
+.dc-val, .tr-val, .hc-val { font-feature-settings: "tnum"; }
+.chart:hover { box-shadow: 0 1px 0 #fff inset, 0 26px 44px -28px rgba(29,20,17,.4); }
+.chart, .col { transition: box-shadow .4s var(--ease), border-color .3s var(--ease), transform .3s var(--spring); }
+.hero { background-image: radial-gradient(120% 140% at 100% 0%, rgba(179,34,26,.28), transparent 55%); }
+
+.dish { grid-template-rows: auto 1fr; }
+.d-body { display: flex; flex-direction: column; }
+.d-foot { margin-top: auto; }
+.d-alt { margin-bottom: 10px; }
+.ph::before { font-size: 96px; right: -4px; top: -10px; color: rgba(179,34,26,.055); }
+@media (max-width: 860px) { .side-card .warn, .side-card p, .side-card h4 { display: none; } .side-card { gap: 14px; } .side-card .site-link { display: none; } }
+
+.sheet input, .sheet select { width: 100%; min-width: 0; }
+.sheet label { min-width: 0; }
+.so-list button { white-space: nowrap; flex: none; }
+/* Match the website: warm cream, rust red, serif headings */
+.k-value, .c-day .num, .d-date .num, .d-sales, .c-sum b, .zoom-head h2, .list-head h2, .sub-title, .brand-name { letter-spacing: 0 !important; font-weight: 700 !important; }
+.seal { font-weight: 600; }
+.sync-note { font-size: 13px; color: var(--muted); margin: 14px 0 0; line-height: 1.5; }
+.service-grid, .chat-dashboard { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, .8fr); gap: 22px; align-items: start; }
+.service-card { min-width: 0; padding: clamp(24px, 4vw, 42px); border: 1px solid var(--line); border-radius: 24px; background: #fffaf2; box-shadow: 0 20px 42px -34px rgba(46,23,18,.42), inset 0 1px 0 rgba(255,255,255,.8); }
+.service-card h2 { margin: 10px 0 14px; font: 700 clamp(28px, 4vw, 42px)/1.15 var(--font-display); }
+.service-card p { max-width: 58ch; color: var(--muted); line-height: 1.7; }
+.reservation-preview { background: radial-gradient(circle at 100% 0, rgba(173,59,39,.1), transparent 36%), #fffaf2; }
+.reservation-preview .cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; margin-top: 8px; padding: 0 22px; border-radius: 999px; color: var(--bg); text-decoration: none; box-shadow: 0 12px 28px -18px rgba(173,59,39,.85); transition: transform .25s var(--spring), box-shadow .25s var(--ease); }
+.reservation-preview .cta:hover { transform: translateY(-2px); box-shadow: 0 18px 32px -18px rgba(173,59,39,.75); }
+.service-hours { margin: 22px 0 0; font-size: 14px; font-weight: 700; }
+.service-note { display: grid; justify-items: start; align-content: center; min-height: 230px; }
+.service-icon, .chat-avatar { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 17px; background: var(--ink); color: var(--bg); font: 30px/1 var(--font-brush); }
+.service-note p { margin-bottom: 0; }
+.chat-preview-head { display: flex; align-items: center; gap: 14px; }
+.chat-preview-head h2 { margin: 0; font-size: clamp(22px, 3vw, 30px); }
+.chat-preview-head > div { min-width: 0; margin-right: auto; }
+.chat-presence { color: var(--muted); font-size: 13px; }
+.chat-thread { display: grid; gap: 10px; margin: 24px 0 14px; padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: var(--bg); }
+.chat-bubble { width: fit-content; max-width: min(100%, 560px); margin: 0; padding: 12px 16px; border-radius: 16px 16px 16px 4px; background: #fffaf2; color: var(--ink) !important; box-shadow: 0 8px 20px -18px rgba(46,23,18,.5); }
+.chat-answer { background: var(--ink); color: var(--bg) !important; }
+.chat-disclaimer { margin: 0; font-size: 13px; }
+.chat-quick { display: grid; gap: 10px; }
+.chat-quick .eyebrow { margin-bottom: 4px; }
+.chat-quick button { min-height: 46px; padding: 10px 15px; border: 1px solid var(--line); border-radius: 14px; background: #fffaf2; color: var(--ink); text-align: left; font-weight: 700; cursor: pointer; transition: transform .22s var(--spring), border-color .22s ease, background .22s ease, box-shadow .22s ease; }
+.chat-quick button:hover { transform: translateY(-2px); border-color: var(--red); background: var(--red-soft); box-shadow: 0 12px 24px -22px rgba(46,23,18,.65); }
+.chat-quick button:active { transform: scale(.98); }
+@media (max-width: 760px) {
+  .wrap { max-width: none; }
+  .tabs { gap: 22px; }
+  .tab { font-size: 15px; }
+  .service-grid, .chat-dashboard { grid-template-columns: minmax(0, 1fr); }
+  .service-note { min-height: 0; }
+  .dish-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 155px), 1fr)); gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dish, .tab, .tab-ink, .pill, .service-card, .chat-quick button { animation: none !important; transition: none !important; }
+}
+
+/* One interaction rhythm for sections, controls, and content. */
+@keyframes panel-swap {
+  from { opacity: 0; transform: translateX(12px) scale(.99); filter: blur(3px); }
+  to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+@keyframes panel-swap-back {
+  from { opacity: 0; transform: translateX(-12px) scale(.99); filter: blur(3px); }
+  to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+@keyframes day-select-settle {
+  0% { transform: translateY(4px) scale(.975); }
+  70% { transform: translateY(-1px) scale(1.012); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes order-arrival {
+  0% { opacity: .45; transform: translateY(8px) scale(.985); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .seg-thumb, .tab-ink {
+    transition: transform 340ms cubic-bezier(.22,.9,.25,1), width 340ms cubic-bezier(.22,.9,.25,1);
+  }
+  .tab-ink { background: var(--red); }
+  .seg button, .tab, .pill, .cta, .ghostbtn, .arrow, .back, .more,
+  .so-list button, .day:not(:disabled), .dc:not(:disabled), .tr-dot,
+  .chat-quick button, [data-chat], .site-link {
+    -webkit-tap-highlight-color: transparent;
+    transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease,
+      transform 220ms cubic-bezier(.2,1.12,.35,1), box-shadow 220ms ease, opacity 180ms ease;
+  }
+  .seg button:active, .tab:active, .pill:active, .cta:active,
+  .ghostbtn:active, .arrow:active:not(:disabled), .back:active,
+  .more:active, .so-list button:active, .day:active:not(:disabled),
+  .dc:active:not(:disabled), .tr-dot:active, .chat-quick button:active,
+  [data-chat]:active {
+    transform: translateY(1px) scale(.96);
+    transition-duration: 75ms;
+    transition-timing-function: cubic-bezier(.2,.7,.2,1);
+  }
+  .seg button:focus-visible, .tab:focus-visible, .pill:focus-visible,
+  .cta:focus-visible, .ghostbtn:focus-visible, .arrow:focus-visible,
+  .back:focus-visible, .day:focus-visible, .dc:focus-visible,
+  .tr-dot:focus-visible, [data-chat]:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 3px;
+  }
+  .tab[aria-selected="true"] { color: var(--red); }
+  .pill[aria-pressed="true"] { box-shadow: inset 0 0 0 1px rgba(255,243,217,.24); }
+  .cta svg, .ghostbtn svg, .arrow svg, .back svg { transition: transform 180ms cubic-bezier(.22,.72,.24,1); }
+  .day:not(:disabled):hover { box-shadow: inset 0 -2px 0 var(--red); }
+  .k-value { transition: color .2s ease; }
+  .tab:focus-visible { outline-offset: 4px; }
+  [role="tabpanel"].tab-swap > * {
+    animation: panel-swap 340ms cubic-bezier(.22,.72,.24,1) both;
+  }
+  [role="tabpanel"].tab-swap > *:nth-child(2) { animation-delay: 34ms; }
+  [role="tabpanel"].tab-swap > *:nth-child(3) { animation-delay: 68ms; }
+  [role="tabpanel"].tab-swap > *:nth-child(4) { animation-delay: 102ms; }
+  [role="tabpanel"].tab-swap.from-l > * { animation-name: panel-swap-back; }
+  .day[aria-pressed="true"] { animation: day-select-settle 380ms cubic-bezier(.18,1.22,.32,1) both; }
+  .dc.sel .dc-bar { animation: day-select-settle 360ms cubic-bezier(.18,1.22,.32,1) both; }
+  .card.fresh, .order.fresh { animation: order-arrival 720ms cubic-bezier(.22,.72,.24,1) both; }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .seg button:hover, .tab:hover { color: var(--red); }
+  .tab:hover:not([aria-selected="true"]) { transform: translateY(-1px); }
+  .pill:hover, .chat-quick button:hover { transform: translateY(-1px); box-shadow: 0 12px 24px -18px rgba(46,23,18,.5); }
+  .cta:hover { transform: translateY(-2px); box-shadow: 0 18px 30px -15px rgba(173,59,39,.7); }
+  .cta:hover svg, .back:hover svg { transform: translateX(3px); }
+  .day:not(:disabled):hover { transform: translateY(-1px); }
+}
+
+@keyframes dashboard-cta-sheen {
+  0% { opacity: 0; transform: translateX(-115%); }
+  18% { opacity: .2; }
+  100% { opacity: 0; transform: translateX(115%); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cta {
+    position: relative;
+    isolation: isolate;
+    transition: transform 280ms cubic-bezier(.18,1.22,.32,1),
+      box-shadow 260ms ease, background-color 180ms ease, color 180ms ease;
+  }
+  .cta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 25%, rgba(255,243,217,.9) 50%, transparent 75%);
+    opacity: 0;
+    transform: translateX(-115%);
+  }
+  .seg button:active, .tab:active, .pill:active, .cta:active,
+  .ghostbtn:active, .arrow:active:not(:disabled), .back:active,
+  .more:active, .so-list button:active, .day:active:not(:disabled),
+  .dc:active:not(:disabled), .tr-dot:active, .chat-quick button:active,
+  [data-chat]:active {
+    transform: translateY(1px) scale(.93);
+    transition-duration: 70ms;
+    transition-timing-function: cubic-bezier(.2,.7,.2,1);
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .cta:hover { transform: translateY(-3px) scale(1.025); }
+  .cta:hover::after { animation: dashboard-cta-sheen .72s cubic-bezier(.22,.72,.24,1) both; }
+  .tab[aria-selected="true"] { transform: translateY(-1px); }
+  .pill[aria-pressed="true"] { transform: translateY(-1px); }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .seal:hover, .seg button:hover, .tab:hover, .pill:hover, .cta:hover, .arrow:hover,
+  .back:hover, .chat-quick button:hover, .day:not(:disabled):hover { transform: none; }
+  .cta:hover { box-shadow: 0 12px 28px -18px rgba(173,59,39,.85); }
+}
+
+/* Status indicators stay still; state changes and user actions carry the motion. */
+.marq-in { animation: none !important; }
+.c-day .flag::before, .card.wait .c-st::before, .toast .t-dot { animation: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="seal" aria-hidden="true">念</div>
+      <div class="brand">
+        <div class="brand-name">Miss Chang An<span class="bz" lang="zh">念长安</span></div>
+        <div class="brand-sub" id="today"></div>
+        <span class="sample-badge" data-t="sample"></span>
+      </div>
+      <div class="seg" role="group" aria-label="Language" id="langSeg"><span class="seg-thumb" aria-hidden="true"></span>
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="zh" aria-pressed="false" lang="zh">中文</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-orders" aria-controls="orders" aria-selected="true" data-t="tabOrders"></button>
+      <button class="tab" role="tab" id="tab-sales" aria-controls="sales" aria-selected="false" data-t="tabSales"></button>
+      <button class="tab" role="tab" id="tab-menu" aria-controls="menu" aria-selected="false" data-t="tabMenu"></button>
+      <button class="tab" role="tab" id="tab-reservations" aria-controls="reservations" aria-selected="false" data-t="tabReservations"></button>
+      <button class="tab" role="tab" id="tab-chat" aria-controls="chat" aria-selected="false" data-t="tabChat"></button>
+      <button class="tab" role="tab" id="tab-site" aria-controls="site" aria-selected="false" data-t="tabSite"></button>
+      <span class="tab-ink" id="tabInk" aria-hidden="true"></span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section role="tabpanel" id="orders" aria-labelledby="tab-orders">
+    <div class="demo-order-board" id="confirmedDemoOrders" aria-live="polite"></div>
+    <div class="kpis hero" id="orderKpis"></div>
+    <div id="orderView"></div>
+  </section>
+
+  <section role="tabpanel" id="sales" aria-labelledby="tab-sales" hidden>
+    <div class="weeknav">
+      <button type="button" class="arrow" id="wkPrev" aria-label="Previous week">‹</button>
+      <span class="wk-label" id="wkLabel"></span>
+      <button type="button" class="arrow" id="wkNext" aria-label="Next week">›</button>
+    </div>
+    <div class="kpis hero" id="weekKpis"></div>
+    <div class="chart" id="dailyChart"></div>
+    <div class="week" id="week"></div>
+    <div class="daybox">
+      <div>
+        <h3 class="sub-title" id="dayTitle"></h3>
+        <div class="daynums" id="dayNums"></div>
+      </div>
+      <div>
+        <h3 class="sub-title" data-t="best"></h3>
+        <ol class="best" id="best"></ol>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart wide" id="trendChart"></div>
+      <div class="chart" id="hoursChart"></div>
+      <div class="chart" id="splitChart"></div>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="menu" aria-labelledby="tab-menu" hidden>
+    <div class="menu-wrap" id="menuRoot">
+      <div class="m-main">
+        <div class="searchbox"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="menuSearch" type="search" autocomplete="off"></div>
+        <div class="pills" id="pills"></div>
+        <div class="dish-grid" id="dishGrid"></div>
+      </div>
+      <aside class="side-card" id="menuSide"></aside>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="reservations" aria-labelledby="tab-reservations" hidden>
+    <div class="service-grid">
+      <article class="service-card reservation-preview">
+        <span class="eyebrow" data-t="reservationLabel"></span>
+        <h2 data-t="reservationTitle"></h2>
+        <p data-t="reservationBody"></p>
+        <a class="cta" href="tel:+13138257757" data-t="reservationCall"></a>
+        <p class="service-hours" data-t="reservationHours"></p>
+      </article>
+      <aside class="service-card service-note">
+        <span class="service-icon" aria-hidden="true">念</span>
+        <p data-t="reservationNote"></p>
+      </aside>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="chat" aria-labelledby="tab-chat" hidden>
+    <div class="chat-dashboard">
+      <article class="service-card chat-preview">
+        <div class="chat-preview-head"><span class="chat-avatar" aria-hidden="true">念</span><div><h2 data-t="chatTitle"></h2><span class="chat-presence" data-t="chatPresence"></span></div></div>
+        <div class="chat-thread" aria-live="polite">
+          <p class="chat-bubble" data-t="chatIntro"></p>
+          <p class="chat-bubble chat-answer" id="chatReply" data-t="chatMenuReply"></p>
+        </div>
+        <p class="chat-disclaimer" data-t="chatDisclaimer"></p>
+      </article>
+      <aside class="service-card chat-quick">
+        <span class="eyebrow" data-t="chatTry"></span>
+        <button type="button" data-chat="chatHoursReply" data-t="chatHours"></button>
+        <button type="button" data-chat="chatMenuReply" data-t="chatMenu"></button>
+        <button type="button" data-chat="chatPickupReply" data-t="chatPickup"></button>
+        <button type="button" data-chat="chatHumanReply" data-t="chatHuman"></button>
+      </aside>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="site" aria-labelledby="tab-site" hidden>
+    <div class="list-head" style="border:0;padding:0"><h2 data-t="siteTitle"></h2><a class="site-link" href="/" target="_blank" rel="noopener" data-t="siteOpen"></a></div>
+    <div class="kpis hero" id="siteKpis"></div>
+    <ul class="checklist" id="checklist"></ul>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden><form class="sheet" id="dishForm">
+  <h3 id="mTitle"></h3>
+  <label><span id="mName"></span><input name="en" required maxlength="60"></label>
+  <label><span id="mZh"></span><input name="zh" maxlength="30" lang="zh"></label>
+  <div class="row"><label><span id="mPrice"></span><input name="price" type="number" min="0" step="0.01" required inputmode="decimal"></label>
+  <label><span id="mCat"></span><select name="cat" id="mCatSel"></select></label></div>
+  <div class="acts"><button type="button" class="ghostbtn" id="mCancel"></button><button type="submit" class="cta" id="mSave"></button></div>
+</form></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="t-dot"></span><span id="toastText"></span></div>
+<div class="foot"><div class="wrap"><footer class="site"><span>Miss Chang An 念长安 · 5071 Rochester Rd, Troy · (313) 825-7757</span><span>Built by Studio 1801</span></footer></div></div>
+
+<script>
+(function () {
+  const T = {
+    en: {
+      tabOrders: "Orders", tabSales: "Sales", tabSite: "Website", tabReservations: "Reservations", tabChat: "Chat",
+      tabMenu: "Menu", menuSync: "Menu edits are saved in this browser only; they do not publish for other customers. Photo edits are temporary previews.", menuTitle: "Your menu", menuOn: "dishes on your website", menuAvail: "available", menuOut: "sold out", menuSoldNow: "Sold out right now", menuAllOk: "Everything is available. Switch a dish off when you run out.", menuPutBack: "Put back", menuNoPhoto: n => `${n} dishes have no photo yet. Photo previews are not published.`, menuAdd: "Add a new dish", menuSee: "See your website", menuFind: "Find a dish", menuAll: "All", menuOnMenu: "On the menu", menuSold: "Sold out", menuPhoto: "Preview photo", menuNone: "No dishes match.",
+      mNew: "New dish", mName: "Dish name", mZh: "Chinese name (optional)", mPrice: "Price", mCat: "Category", mCancel: "Cancel", mSave: "Add dish", menuAdded: n => `Added <b>${n}</b> to your menu`, menuOffToast: n => `<b>${n}</b> is sold out on your website`, menuOnToast: n => `<b>${n}</b> is back on your website`,
+      cats: { "xian-specials": "Xi'an specials", noodles: "Hand-made noodles", "small-plates": "Small plates", "dim-sum": "Dim sum and snacks", drinks: "Tea, boba and drinks" },
+      sample: "DEMO · Sample orders and metrics",
+      kOrders: "Orders today", kSales: "Sales today", kWaiting: "Not picked up yet",
+      kOrdersNote: (p, d) => `<b>${p}</b> pickup · <b>${d}</b> delivery`, kSalesNote: n => `${n} average order`, kWaitNote: n => n ? "ready or on the way" : "all caught up",
+      newOrder: (name, type, s) => `New ${type.toLowerCase()} order from ${name} · <b>${s}</b>`,
+      weekHint: "Scroll the week. Tap a day to open it.", open: "Open day ›", backWeek: "‹ Week", noOrders: "No orders",
+      prevDay: "Previous day", nextDay: "Next day", dayTotals: n => n,
+      pickup: "Pickup", delivery: "Delivery",
+      st: { wait: "Waiting", pickedUp: "Picked up", delivered: "Delivered", later: t => `For ${t}` },
+      showAll: n => `Show all ${n} orders`, showLess: "Show fewer",
+      wkSales: "Sales this week", wkSalesPast: "Sales that week", wkOrders: "Orders", wkAvg: "Average order",
+      vsSoFar: d => `${d} vs last week`, vsPrev: d => `${d} vs the week before`,
+      closed: "Closed", upcoming: "Coming up", today: "Today", bestDay: "Best day", ordersN: n => `${n} orders`,
+      dayOrders: "Orders", daySales: "Sales", dayPickup: "Pickup", dayDelivery: "Delivery",
+      best: "Best sellers", sold: n => `${n} sold`,
+      cDaily: "Sales by day", lgThis: "This week", lgThat: "That week", lgLast: "Last week", lgBefore: "Week before",
+      cTrend: n => `Last ${n} weeks`, cHours: "Busy times", peak: l => `Busiest at <b>${l}</b>`, cSplit: "Pickup and delivery", splitNote: "Share of this week's sales", tapWeek: "Tap a dot to open that week",
+      siteTitle: "Customer website", siteOpen: "Open the website",
+      sVisits: "Visits this week", sOrder: "Order preview taps", sCall: "Call taps",
+      vVisits: "sample figures", vOrder: "opened the pickup preview; no order is sent", vCall: "sample figures",
+      live: "Live", soon: "Next step",
+      checks: [
+        ["Pickup order preview", "Customers can build a draft, but it is not sent to this dashboard or the kitchen and no payment is taken."],
+        ["Reservations by phone", "The website links customers to call; online booking is not connected."],
+        ["Menu preview", "Sold-out and added-dish changes sync only in this browser; they are not published to other customers."],
+        ["Full menu with Chinese names and prices", "Specials, noodles, small plates, dim sum and boba, with spice marks and starting prices."],
+        ["Hours, address and directions", "Tuesday to Sunday, 11:30 am to 9 pm. One tap to the map."],
+        ["Your story", "What 念长安 means, and that you were Nook Tea & Cafe and still make the boba."],
+        ["No leftover template text", "Every link and title is real, so nothing looks unfinished."]
+      ],
+      reservationTitle: "Reservations",
+      reservationLabel: "Customer-facing option",
+      reservationBody: "The website invites guests to call the restaurant to ask about a table. There is no online reservation form or live booking list.",
+      reservationCall: "Call (313) 825-7757",
+      reservationHours: "Tuesday–Sunday · 11:30 am–9:00 pm",
+      reservationNote: "This tab is an overview of the website link, not a reservation inbox.",
+      chatTitle: "Website chat helper",
+      chatIntro: "Hi, I’m the Miss Chang An helper. I can answer common questions, but I don’t send messages to staff.",
+      chatPresence: "Website helper",
+      chatDisclaimer: "This is a feature preview—not a live staff inbox. Messages do not reach the restaurant.",
+      chatTry: "Try a common question",
+      chatHours: "Hours",
+      chatMenu: "Menu",
+      chatPickup: "Pickup orders",
+      chatHuman: "Talk to a person",
+      chatHoursReply: "Open Tuesday to Sunday, 11:30 am to 9:00 pm. Closed Mondays.",
+      chatMenuReply: "The website has the full menu with prices, spice labels, and starting-price notes.",
+      chatPickupReply: "Guests can build a pickup preview. It is not submitted and no payment is taken.",
+      chatHumanReply: "For a real person, call (313) 825-7757 or message the restaurant on Instagram.",
+      days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      daysLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      mon: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+      date: d => T.en.mon[d.getMonth()] + " " + d.getDate(),
+      range: (a, b) => a.getMonth() === b.getMonth() ? `${T.en.mon[a.getMonth()]} ${a.getDate()} to ${b.getDate()}` : `${T.en.date(a)} to ${T.en.date(b)}`
+    },
+    zh: {
+      tabOrders: "订单", tabSales: "营业额", tabSite: "网站", tabReservations: "预约", tabChat: "聊天",
+      tabMenu: "菜单", menuSync: "菜单修改只保存在当前浏览器，不会发布给其他顾客。照片修改只是临时预览。", menuTitle: "您的菜单", menuOn: "道菜在网站上", menuAvail: "可点", menuOut: "已售完", menuSoldNow: "现在售完的菜", menuAllOk: "全部都能点。卖完了就把那道菜关掉。", menuPutBack: "恢复", menuNoPhoto: n => `还有 ${n} 道菜没有照片。照片预览不会发布。`, menuAdd: "添加新菜", menuSee: "查看网站", menuFind: "搜索菜名", menuAll: "全部", menuOnMenu: "在菜单上", menuSold: "已售完", menuPhoto: "预览照片", menuNone: "没有找到。",
+      mNew: "新菜品", mName: "英文菜名", mZh: "中文菜名（选填）", mPrice: "价格", mCat: "分类", mCancel: "取消", mSave: "添加", menuAdded: n => `已添加 <b>${n}</b>`, menuOffToast: n => `<b>${n}</b> 在网站上已售完`, menuOnToast: n => `<b>${n}</b> 已恢复`,
+      cats: { "xian-specials": "西安特色", noodles: "手工面", "small-plates": "小菜", "dim-sum": "点心和小吃", drinks: "茶、奶茶和饮品" },
+      sample: "演示 · 示例订单和数据",
+      kOrders: "今天订单", kSales: "今天营业额", kWaiting: "还没取走",
+      kOrdersNote: (p, d) => `自取 <b>${p}</b> · 外送 <b>${d}</b>`, kSalesNote: n => `客单价 ${n}`, kWaitNote: n => n ? "已做好或在路上" : "都处理完了",
+      newOrder: (name, type, s) => `新${type}订单，${name} · <b>${s}</b>`,
+      weekHint: "左右滑动看整周，点一天打开。", open: "打开这一天 ›", backWeek: "‹ 返回本周", noOrders: "没有订单",
+      prevDay: "前一天", nextDay: "后一天", dayTotals: n => n,
+      pickup: "自取", delivery: "外送",
+      st: { wait: "等待中", pickedUp: "已取餐", delivered: "已送达", later: t => `预约 ${t}` },
+      showAll: n => `显示全部 ${n} 单`, showLess: "收起",
+      wkSales: "本周营业额", wkSalesPast: "该周营业额", wkOrders: "订单数", wkAvg: "客单价",
+      vsSoFar: d => `比上周同期 ${d}`, vsPrev: d => `比前一周 ${d}`,
+      closed: "休息", upcoming: "还没到", today: "今天", bestDay: "最好的一天", ordersN: n => `${n} 单`,
+      dayOrders: "订单", daySales: "营业额", dayPickup: "自取", dayDelivery: "外送",
+      best: "热销菜", sold: n => `${n} 份`,
+      cDaily: "每日营业额", lgThis: "本周", lgThat: "该周", lgLast: "上周", lgBefore: "前一周",
+      cTrend: n => `最近 ${n} 周`, cHours: "忙碌时段", peak: l => `最忙是 <b>${l}</b>`, cSplit: "自取与外送", splitNote: "本周营业额占比", tapWeek: "点一个点，打开那一周",
+      siteTitle: "顾客网站", siteOpen: "打开网站",
+      sVisits: "本周访问", sOrder: "点餐预览点击", sCall: "电话点击",
+      vVisits: "示例数据", vOrder: "打开自取预览；不会提交订单", vCall: "示例数据",
+      live: "已上线", soon: "下一步",
+      checks: [
+        ["自取点餐预览", "顾客可以建立草稿，但不会发送到本后台或厨房，也不会收款。"],
+        ["电话预约", "网站提供电话联系；尚未连接在线预约。"],
+        ["菜单预览", "售罄和新增菜品只在当前浏览器同步，不会发布给其他顾客。"],
+        ["完整菜单，中英文菜名和价格", "西安特色、手工面、小菜、点心和奶茶，标注辣度和起价。"],
+        ["营业时间、地址和路线", "周二到周日，上午 11:30 到晚上 9 点，一键打开地图。"],
+        ["您的故事", "念长安名字的意思，以及以前是 Nook Tea & Cafe、现在还在做奶茶。"],
+        ["没有残留的模板文字", "每个链接和标题都是真的，看起来很完整。"]
+      ],
+      reservationTitle: "预约",
+      reservationLabel: "顾客可用方式",
+      reservationBody: "网站引导顾客致电餐厅询问座位。目前没有在线预约表单或实时预约列表。",
+      reservationCall: "拨打 (313) 825-7757",
+      reservationHours: "周二至周日 · 上午 11:30 至晚上 9:00",
+      reservationNote: "此页面仅介绍网站上的电话链接，不是预约收件箱。",
+      chatTitle: "网站聊天助手",
+      chatIntro: "你好，我是念长安助手。我可以回答常见问题，但不会把消息发送给员工。",
+      chatPresence: "网站助手",
+      chatDisclaimer: "这是功能预览，不是实时客服收件箱。消息不会发送到餐厅。",
+      chatTry: "试试常见问题",
+      chatHours: "营业时间",
+      chatMenu: "菜单",
+      chatPickup: "自取点餐",
+      chatHuman: "联系工作人员",
+      chatHoursReply: "周二至周日营业，上午 11:30 至晚上 9:00；周一休息。",
+      chatMenuReply: "网站提供完整菜单、价格、辣度标记和起价说明。",
+      chatPickupReply: "顾客可以建立自取订单预览，但不会提交订单，也不会收款。",
+      chatHumanReply: "如需联系工作人员，请拨打 (313) 825-7757 或通过 Instagram 联系餐厅。",
+      days: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+      daysLong: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+      date: d => `${d.getMonth() + 1}月${d.getDate()}日`,
+      range: (a, b) => `${a.getMonth() + 1}月${a.getDate()}日 到 ${b.getMonth() + 1}月${b.getDate()}日`
+    }
+  };
+  let lang = "en";
+  try { if (localStorage.getItem("mca-lang") === "zh") lang = "zh"; } catch (_) {}
+  const t = () => T[lang];
+
+  // The menu comes from the website's own data file (src/data/menu.json). Same dishes, same names, same prices.
+  const SITE = {"updated":"2026-09-30","categories":[{"id":"xian-specials","character":"西","title":"Xi'an specials","items":[{"name":"Chili oil-splashed noodles","chinese":"油泼面","spice":"SP","price":"From $10.99","description":"Wide hand-made noodles, chili, garlic, hot oil.","id":"chili-oil-splashed-noodles"},{"name":"Liangpi cold noodles","chinese":"西安面皮","spice":"SP","price":"From $9.89","description":"Cold skin noodles in chili oil.","id":"liangpi-cold-noodles"},{"name":"Cumin lamb roujiamo","chinese":"孜然羊肉肉夹馍","price":"From $9.99","description":"Wok-fried lamb with cumin in your choice of bun.","id":"cumin-lamb-roujiamo"},{"name":"Braised pork roujiamo","chinese":"猪肉肉夹馍","price":"From $7.99","description":"Slow-braised pork in your choice of bun.","id":"braised-pork-roujiamo"},{"name":"Spicy chicken roujiamo","chinese":"香辣鸡肉肉夹馍","spice":"SP","price":"From $8.99","description":"Spiced chicken in your choice of bun.","id":"spicy-chicken-roujiamo"},{"name":"Xi'an lamb bread soup","chinese":"羊肉泡馍","price":"From $14.99","description":"Lamb broth, lamb, torn flatbread, sweet potato noodle, tofu skin, wood ear, lily flower.","id":"xi-an-lamb-bread-soup"}]},{"id":"noodles","character":"面","title":"Hand-made noodles","items":[{"name":"Beef noodle soup","chinese":"兰州牛肉面","price":"From $13.99","description":"Clear beef broth, beef shank, white radish, cilantro, scallion.","id":"beef-noodle-soup"},{"name":"Braised beef noodle soup","chinese":"红烧牛肉面","spice":"SP3","price":"From $13.99","description":"Rich braised beef broth, braised beef, scallion.","id":"braised-beef-noodle-soup"},{"name":"Spicy and sour beef noodle soup","chinese":"酸汤牛肉面","spice":"SP5","price":"From $13.99","description":"Spicy, sour beef broth, beef shank, Chinese pickles, cilantro.","id":"spicy-and-sour-beef-noodle-soup"},{"name":"Chongqing noodle soup","chinese":"重庆小面","spice":"SP2","price":"From $13.99","description":"Spicy beef broth, fried ground pork, soybeans, garlic, peanuts, preserved pickle, sesame.","id":"chongqing-noodle-soup"},{"name":"Lamb noodle soup","chinese":"滋补羊肉烩面","price":"From $13.99","description":"Rich lamb broth, lamb, sweet potato noodle, tofu skin, wood ear, lily flower.","id":"lamb-noodle-soup"},{"name":"Braised chicken belt noodles","chinese":"大盘鸡裤带面","spice":"SP3","price":"From $13.99","description":"Wide belt noodles, braised chicken legs, greens.","id":"braised-chicken-belt-noodles"},{"name":"Beijing zhajiang noodles","chinese":"老北京炸酱面","price":"From $12.99","description":"Brown pork sauce, sesame, fried egg, carrot, cucumber.","id":"beijing-zhajiang-noodles"},{"name":"Tomato and egg knife-shaved noodles","chinese":"西红柿鸡蛋刀削面","price":"From $12.99","description":"Tomato and egg broth, preserved pickle, cucumber, scallion.","id":"tomato-and-egg-knife-shaved-noodles"},{"name":"Dan dan noodles","chinese":"担担面","spice":"SP","price":"From $12.99","description":"Sweet and spicy sesame chili sauce, crushed peanuts optional.","id":"dan-dan-noodles"},{"name":"Garlic noodles","chinese":"蒜香素拌面","price":"$11.99","description":"Tossed with garlic. No meat.","id":"garlic-noodles"}]},{"id":"small-plates","character":"菜","title":"Small plates","items":[{"name":"Garlic cucumber salad","chinese":"拍黄瓜","price":"From $5.49","description":"Smashed cucumber, garlic, soy, vinegar. Chili oil optional.","id":"garlic-cucumber-salad"},{"name":"Black wood ear","chinese":"爽口木耳","price":"$5.99","description":"Wood ear, cilantro, onion, spiced dressing.","id":"black-wood-ear"},{"name":"Spicy wonton soup","chinese":"红油抄手","spice":"SP","price":"$8.99","description":"Large pork wontons, preserved pickle, scallion, cilantro.","id":"spicy-wonton-soup"},{"name":"Red chili wontons, 8","chinese":"红油抄手","spice":"SP","price":"From $9.99","description":"Pork wontons in red chili oil.","id":"red-chili-wontons-8"},{"name":"Chicken egg rolls, 2","chinese":"鸡肉蛋卷","price":"$4.49","description":"Chicken and vegetables.","id":"chicken-egg-rolls-2"}]},{"id":"dim-sum","character":"点","title":"Dim sum and snacks","items":[{"name":"Soup dumplings, 6","chinese":"手工灌汤小笼包","price":"$10.99","description":"Hand-made pork soup dumplings. Made fresh, 10 to 15 minutes.","id":"soup-dumplings-6"},{"name":"Crystal shrimp dumplings, 6","chinese":"水晶虾饺","price":"$7.99","description":"Made fresh, 10 to 15 minutes.","id":"crystal-shrimp-dumplings-6"},{"name":"Beef dumplings","chinese":"牛肉蒸饺","price":"$9.99","description":"Ground beef, carrot, onion.","id":"beef-dumplings"},{"name":"Jianbing","chinese":"煎饼果子","price":"From $6.99","description":"Chinese crepe, crispy cracker, preserved pickle, scallion, sweet sauce.","id":"jianbing"},{"name":"Scallion pancake","chinese":"葱油饼","price":"$6.49","description":"Crisp, layered, green onion.","id":"scallion-pancake"},{"name":"Shrimp spring rolls, 3","chinese":"虾春卷","price":"$4.99","id":"shrimp-spring-rolls-3"},{"name":"Vegetable spring rolls, 3","chinese":"素春卷","price":"$3.99","id":"vegetable-spring-rolls-3"},{"name":"Tea egg","chinese":"茶叶蛋","price":"$2.99","description":"Simmered in tea and spice.","id":"tea-egg"},{"name":"House chili oil","chinese":"辣椒油","spice":"SP","price":"$6.99","description":"Our own, made in the kitchen.","id":"house-chili-oil"}]},{"id":"drinks","character":"饮","title":"Tea, boba and drinks","items":[{"name":"Hong Kong milk tea","chinese":"港式奶茶","price":"From $4.99","id":"hong-kong-milk-tea"},{"name":"Taro ube latte","chinese":"芋头奶茶","price":"From $4.99","id":"taro-ube-latte"},{"name":"Wintermelon green tea","chinese":"冬瓜绿茶","price":"From $4.99","id":"wintermelon-green-tea"},{"name":"Mango smoothie","price":"From $5.99","id":"mango-smoothie"},{"name":"Pink peach sparkling refresher","price":"From $5.99","id":"pink-peach-sparkling-refresher"}]}]};
+  const W = { "chili-oil-splashed-noodles": 10, "liangpi-cold-noodles": 5, "cumin-lamb-roujiamo": 8, "braised-pork-roujiamo": 4, "spicy-chicken-roujiamo": 3, "xi-an-lamb-bread-soup": 4, "beef-noodle-soup": 5, "dan-dan-noodles": 3, "garlic-noodles": 2, "garlic-cucumber-salad": 3, "red-chili-wontons-8": 3, "soup-dumplings-6": 7, "beef-dumplings": 2, "chicken-egg-rolls-2": 2, "tea-egg": 2, "hong-kong-milk-tea": 5, "taro-ube-latte": 3, "wintermelon-green-tea": 3, "mango-smoothie": 2, "pink-peach-sparkling-refresher": 2 };
+  const MENU = SITE.categories.flatMap(c => c.items.map(it => ({ id: it.id, en: it.name, zh: it.chinese || "", price: +(String(it.price).match(/[\d.]+/) || [0])[0], w: W[it.id] ?? 1, drink: c.id === "drinks", cat: c.id })));
+  T.en.cats = Object.fromEntries(SITE.categories.map(c => [c.id, c.title]));
+  T.zh.cats = { "xian-specials": "西安特色", noodles: "手工面", "small-plates": "小菜", "dim-sum": "点心", drinks: "茶饮" };
+  const BY_ID = Object.fromEntries(MENU.map(m => [m.id, m]));
+  const WSUM = MENU.reduce((s, m) => s + m.w, 0), DRINKS = MENU.filter(m => m.drink);
+  const nameOf = m => lang === "zh" && m.zh ? m.zh : m.en;
+  const altOf = m => lang === "zh" ? m.en : m.zh;
+
+  function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
+  const money = n => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const money0 = n => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const DEMO_ORDERS_KEY = "mca-demo-pickup-orders-v1";
+  const DEMO_ORDER_KEYS = [DEMO_ORDERS_KEY, "mca-orders"];
+  function readCustomerOrders() {
+    const found = new Map();
+    for (const storageKey of DEMO_ORDER_KEYS) {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        if (!Array.isArray(parsed)) continue;
+        for (const row of parsed) {
+          if (!row || typeof row.id !== "string" || typeof row.name !== "string" || found.has(row.id)) continue;
+          const rawItems = Array.isArray(row.items) ? row.items : row.lines;
+          const at = new Date(row.createdAt || row.at);
+          const cents = Number(row.totalCents ?? row.total);
+          if (!Array.isArray(rawItems) || !rawItems.length || !Number.isFinite(at.getTime()) || !Number.isFinite(cents) || cents < 0) continue;
+          const items = rawItems.filter(item => item && typeof item.name === "string").map((item, i) => ({
+            id: `website-${row.id}-${i}`, q: Math.max(1, Number(item.quantity ?? item.qty) || 1),
+            name: item.name, chinese: item.chinese || "", price: Number(item.unitCents ?? item.cents) / 100 || 0
+          }));
+          if (!items.length) continue;
+          found.set(row.id, { id: row.id, web: true, createdAt: at.getTime(), date: at, name: row.name,
+            phone: typeof row.phone === "string" ? row.phone : "", notes: typeof row.notes === "string" ? row.notes : "",
+            type: "pickup", placed: at.getHours() * 60 + at.getMinutes(), total: cents / 100, items,
+            customerStatus: row.status, sched: null });
+        }
+      } catch (_) {}
+    }
+    return [...found.values()].sort((a, b) => b.createdAt - a.createdAt);
+  }
+  function syncCustomerOrders() {
+    for (const d of DAYS) {
+      for (let i = d.orders.length - 1; i >= 0; i--) if (d.orders[i].web) d.orders.splice(i, 1);
+    }
+    for (const order of readCustomerOrders()) {
+      const target = BY_KEY[key(order.date)] || DAYS[DAYS.length - 1];
+      target.orders.push(order);
+      for (const item of order.items) BY_ID[item.id] = { id: item.id, en: item.name, zh: item.chinese, price: item.price, w: 0, drink: false };
+    }
+  }
+  function renderConfirmedDemoOrders() {
+    if (window.mcaLive) { window.mcaLive.renderOrders(); return; }
+    const board = document.getElementById("confirmedDemoOrders");
+    if (!board) return;
+    const customerOrders = readCustomerOrders();
+    const liveDashboard = location.hostname !== "miss-chang-an-nffg.vercel.app"
+      ? ' If you ordered on the live website, <a href="https://miss-chang-an-nffg.vercel.app/dashboard/">open the live Vercel dashboard</a> in the browser where you placed it.'
+      : "";
+    board.innerHTML = `<div class="demo-order-head"><div><span class="demo-order-label">Same-site browser demo</span><h2>Customer demo orders</h2></div><span class="k-note">${customerOrders.length} saved</span></div><p class="demo-order-empty">${customerOrders.length ? "Confirmed orders appear in the order list below with a Website demo label. The totals include them." : "No customer orders saved on this site in this browser yet."} <a href="../order">Open this site's ordering page</a>. Keep ordering and the dashboard in the same preview or browser tab. Replit preview and Vercel do not share demo orders.${liveDashboard}</p>`;
+  }
+  function clock(m) { m = Math.floor(m); const h = Math.floor(m / 60) % 24, mm = String(m % 60).padStart(2, "0"); return lang === "zh" ? ((h % 12) || 12) + ":" + mm + (h < 12 ? " 上午" : " 下午") : ((h % 12) || 12) + ":" + mm + (h >= 12 ? " pm" : " am"); }
+
+  // ---------- Motion helpers ----------
+  const motionPreference = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  let reduced = !!motionPreference?.matches;
+  motionPreference?.addEventListener("change", event => {
+    reduced = event.matches;
+    if (reduced) {
+      document.getAnimations().forEach(animation => animation.cancel());
+      counterFrames.forEach(frame => cancelAnimationFrame(frame));
+      counterFrames.clear();
+      document.querySelectorAll("[data-v]").forEach(el => {
+        const format = FMT[el.dataset.f || "int"];
+        el.textContent = format(+el.dataset.v);
+      });
+    }
+  });
+  const FMT = { int: v => Math.round(v).toString(), money0: v => money0(v), money: v => money(v) };
+  const SHOWN = {};
+  const counterFrames = new Set();
+  function runCounters(root, fresh) {
+    root.querySelectorAll("[data-v]").forEach(el => {
+      const id = el.dataset.id, to = +el.dataset.v, f = FMT[el.dataset.f || "int"];
+      const from = fresh ? 0 : (SHOWN[id] ?? to); SHOWN[id] = to;
+      if (reduced || from === to) { el.textContent = f(to); return; }
+      const t0 = performance.now(), dur = fresh ? 680 : 420;
+      el.textContent = f(from);
+      let frame;
+      const step = ts => {
+        counterFrames.delete(frame);
+        const k = Math.min(1, (ts - t0) / dur), e = k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+        el.textContent = f(from + (to - from) * e);
+        if (k < 1) { frame = requestAnimationFrame(step); counterFrames.add(frame); }
+      };
+      frame = requestAnimationFrame(step); counterFrames.add(frame);
+    });
+  }
+  function replay(el, ...cls) { if (!el) return; el.classList.remove("enter", "from-l", "from-r", "fade", "swap", "tab-swap"); if (reduced || !cls.length) return; void el.offsetWidth; el.classList.add(...cls); }
+  function index(el, sel, prop) { [...el.querySelectorAll(sel)].forEach((c, i) => c.style.setProperty(prop || "--j", i)); }
+  function moveThumb(seg) { const th = seg.querySelector(".seg-thumb"), on = seg.querySelector('[aria-pressed="true"]'); if (!th || !on) return; th.style.width = on.offsetWidth + "px"; th.style.transform = `translateX(${on.offsetLeft}px)`; }
+  function moveInk() { const ink = document.getElementById("tabInk"), on = document.querySelector('.tab[aria-selected="true"]'); if (!ink || !on) return; ink.style.width = on.offsetWidth + "px"; ink.style.transform = `translateX(${on.offsetLeft}px)`; }
+  let toastTimer;
+  function toast(html) { const el = document.getElementById("toast"); document.getElementById("toastText").innerHTML = html; el.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 4200); }
+  // Expand one element's box into another's, like a card opening into a page
+  function morph(fromRect, toRect, content, onEnd) {
+    if (reduced) { onEnd && onEnd(); return; }
+    const g = document.createElement("div"); g.className = "ghost";
+    if (content) { g.appendChild(content); g.style.setProperty("--gw", fromRect.width + "px"); }
+    document.body.appendChild(g);
+    const k = r => ({ top: r.top + "px", left: r.left + "px", width: r.width + "px", height: r.height + "px" });
+    const a = g.animate([{ ...k(fromRect), borderRadius: "16px", opacity: 1 }, { ...k(toRect), borderRadius: "16px", opacity: 1, offset: .7 }, { ...k(toRect), borderRadius: "16px", opacity: 0 }], { duration: 430, easing: "cubic-bezier(.22,1,.36,1)" });
+    if (content) content.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 210, easing: "ease-out", fill: "forwards" });
+    a.onfinish = () => { g.remove(); onEnd && onEnd(); };
+  }
+
+  // Demo day: today, or Tuesday if today is a Monday (closed). The clock starts in the dinner rush.
+  const day = new Date(); day.setHours(12, 0, 0, 0); if (day.getDay() === 1) day.setDate(day.getDate() + 1);
+  const seed = day.getFullYear() * 1000 + day.getMonth() * 40 + day.getDate();
+  const START = 18 * 60 + 40, OPEN = 11 * 60 + 30, CLOSE = 21 * 60, loadedAt = Date.now();
+  const now = () => START + (Date.now() - loadedAt) / 60000;
+
+  const NAMES = ["Grace L.", "Wei Z.", "Priya S.", "Jason K.", "Emily R.", "Mohammed A.", "Hannah P.", "Daniel L.", "Mei C.", "Tom B.", "Arjun N.", "Sofia M.", "Linh T.", "Rachel O.", "Yusuf D.", "Chen Y.", "Olivia W.", "Marcus J.", "Aiko F.", "Brian S.", "Fatima H.", "Jenny X.", "Luis G.", "Nina V.", "Xiaoyu L.", "Derek M."];
+  function pick(r) { let x = r() * WSUM; for (const m of MENU) { x -= m.w; if (x <= 0) return m; } return MENU[0]; }
+  function makeOrder(r, placed) {
+    const type = r() < 0.38 ? "delivery" : "pickup";
+    const lines = new Map(), n = 1 + Math.floor(r() * r() * 4) + (type === "delivery" && r() < 0.4 ? 1 : 0);
+    for (let i = 0; i < n; i++) { const m = pick(r); lines.set(m.id, (lines.get(m.id) || 0) + (r() < 0.12 ? 2 : 1)); }
+    if (r() < 0.35) { const m = DRINKS[Math.floor(r() * DRINKS.length)]; lines.set(m.id, (lines.get(m.id) || 0) + 1); }
+    r();
+    const items = [...lines].map(([id, q]) => ({ id, q }));
+    return { type, placed, items, total: items.reduce((s, it) => s + BY_ID[it.id].price * it.q, 0), name: NAMES[Math.floor(r() * NAMES.length)], doneAfter: (type === "delivery" ? 22 : 14) + r() * 12, sched: null };
+  }
+  const rate = m => (m >= 1050 && m <= 1170) ? 0.16 : (m >= 720 && m <= 810) ? 0.13 : (m >= 690 && m < 720) || (m > 810 && m <= 840) || (m >= 1020 && m < 1050) ? 0.07 : 0.028;
+  const DOW_MULT = { 0: 1.4, 2: 0.9, 3: 0.95, 4: 1.0, 5: 1.3, 6: 1.55 };
+  const key = d => d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
+
+  // 70 days of history, kept small on purpose so the demo is easy to follow. The last day is today.
+  const NDAYS = 70, DAYS = [], BY_KEY = {}, FUTURE = {};
+  const COUNT = { 0: 7, 2: 4, 3: 5, 4: 5, 5: 7, 6: 8 };
+  function timesFor(rr, n) { const ts = []; for (let i = 0; i < n; i++) { const w = rr() < 0.42 ? [700, 840] : [1020, 1240]; ts.push(w[0] + rr() * (w[1] - w[0])); } return ts.sort((x, y) => x - y); }
+  for (let i = 0; i < NDAYS; i++) {
+    const dt = new Date(day); dt.setDate(day.getDate() - (NDAYS - 1 - i));
+    const dow = dt.getDay(); let d;
+    if (i === NDAYS - 1) d = { dt, dow, today: true, orders: [] };
+    else if (dow === 1) d = { dt, dow, closed: true, orders: [] };
+    else { const rr = rng(seed - (NDAYS - 1 - i) * 97), n = COUNT[dow] + Math.floor(rr() * 3) - 1; d = { dt, dow, orders: timesFor(rr, n).map(m => makeOrder(rr, m)) }; }
+    DAYS.push(d); BY_KEY[key(dt)] = d;
+  }
+  const orders = DAYS[NDAYS - 1].orders;
+  const r = rng(seed);
+  timesFor(r, 7).filter(m => m < START - 30).forEach(m => orders.push(makeOrder(r, m)));
+  orders.push(makeOrder(r, START - 13), makeOrder(r, START - 5));
+  { const o = makeOrder(r, START - 90); o.sched = 19 * 60 + 30; orders.push(o); }
+  // One catering order already booked for the next open day this week
+  for (let k = 1; k <= 6; k++) {
+    const dt = new Date(day); dt.setDate(day.getDate() + k);
+    if (dt.getDay() === 1) continue;
+    if (((dt.getDay() + 6) % 7) < ((day.getDay() + 6) % 7)) break;
+    const o = makeOrder(r, START - 300); o.type = "pickup"; o.name = "Kelly Services office"; o.sched = 12 * 60;
+    o.items = [{ id: "chili-oil-splashed-noodles", q: 3 }, { id: "garlic-cucumber-salad", q: 2 }, { id: "hong-kong-milk-tea", q: 6 }];
+    o.total = o.items.reduce((x, it) => x + BY_ID[it.id].price * it.q, 0);
+    FUTURE[key(dt)] = [o]; break;
+  }
+
+  // Status is worked out from the clock, nobody has to tap anything
+  function statusIn(d, o, n) { return o.web || d.today ? statusOf(o, n) : d.future ? "later" : "done"; }
+  function statusOf(o, n) {
+    if (o.web) return o.customerStatus === "Picked up" || o.customerStatus === "done" ? "done" : "wait";
+    const readyBy = o.sched ? o.sched : o.placed + o.doneAfter;
+    if (o.sched && n < o.sched - 20) return "later";
+    if (n < readyBy) return "wait";
+    return "done";
+  }
+
+  // ---------- Orders tab ----------
+  let owk = 0, zoomKey = readCustomerOrders().length ? key(day) : null, freshKey = null, needScroll = true;
+  const dayOrders = d => d.future ? (FUTURE[key(d.dt)] || []) : d.orders;
+  const stLabel = (st, o) => o.web && st === "wait" ? (lang === "zh" ? "新订单" : "New") : st === "later" ? t().st.later(clock(o.sched)) : st === "wait" ? t().st.wait : (o.type === "pickup" ? t().st.pickedUp : t().st.delivered);
+  const sortOs = list => list.slice().sort((x, y) => Number(!!y.web) - Number(!!x.web) || (x.web && y.web ? y.createdAt - x.createdAt : (x.sched || x.placed) - (y.sched || y.placed)));
+  function renderOrders(opt) {
+    if (window.mcaLive?.mode !== "samples") { window.mcaLive?.renderOrders(); return; }
+    opt = opt || {};
+    syncCustomerOrders();
+    renderConfirmedDemoOrders();
+    const n = now();
+    const sales = orders.reduce((x, o) => x + o.total, 0);
+    const waiting = orders.filter(o => statusOf(o, n) === "wait").length;
+    const p = orders.filter(o => o.type === "pickup").length;
+    const ok = document.getElementById("orderKpis");
+    ok.innerHTML =
+      kpi(t().kOrders, orders.length, t().kOrdersNote(p, orders.length - p), false, ["o-n", "int"]) +
+      kpi(t().kSales, money0(sales), t().kSalesNote(money(sales / orders.length)), false, ["o-s", "money0", sales]) +
+      kpi(t().kWaiting, waiting, t().kWaitNote(waiting), waiting > 0, ["o-w", "int"]);
+    runCounters(ok, opt.fresh);
+    const view = document.getElementById("orderView");
+    const days = weekDays(owk);
+    if (zoomKey) { renderZoom(view, days, n, opt); return; }
+    const old = document.getElementById("strip"), keepX = old ? old.scrollLeft : 0;
+    view.innerHTML = `<div class="strip-head"><div class="weeknav">
+        <button type="button" class="arrow" data-owk="1" aria-label="Previous week"${owk >= maxBack ? " disabled" : ""}>‹</button>
+        <span class="wk-label">${t().range(days[0].dt, days[6].dt)}</span>
+        <button type="button" class="arrow" data-owk="-1" aria-label="Next week"${owk === 0 ? " disabled" : ""}>›</button>
+      </div><span class="hint">${t().weekHint}</span></div>
+      <div class="strip" id="strip">${days.map(d => colHTML(d, n)).join("")}</div>`;
+    const strip = document.getElementById("strip");
+    [...strip.children].forEach((c, i) => { c.style.setProperty("--i", i); [...c.querySelectorAll(".card")].forEach((cd, j) => cd.style.setProperty("--j", j)); });
+    if (needScroll) { focusCol(strip.querySelector(".col.today") || strip.querySelector(".col[data-k]"), true); needScroll = false; }
+    else strip.scrollLeft = keepX;
+    strip.addEventListener("scroll", () => edgeFade(strip), { passive: true }); edgeFade(strip);
+    if (opt.anim) replay(strip, opt.anim);
+    freshKey = null;
+  }
+  function edgeFade(strip) { const max = strip.scrollWidth - strip.clientWidth; strip.style.setProperty("--fl", strip.scrollLeft > 4 ? "28px" : "0px"); strip.style.setProperty("--fr", strip.scrollLeft < max - 4 ? "40px" : "0px"); }
+  // Put a day in view. On wide screens keep two earlier days visible so the week reads left to right.
+  function focusCol(col, withContext) {
+    const strip = document.getElementById("strip"); if (!strip || !col) return;
+    const cols = [...strip.children], i = cols.indexOf(col);
+    const fits = Math.floor(strip.clientWidth / (col.offsetWidth + 12));
+    const lead = withContext && fits >= 3 ? cols[Math.max(0, i - 2)] : col;
+    const go = () => { strip.scrollLeft += lead.getBoundingClientRect().left - strip.getBoundingClientRect().left; };
+    go(); requestAnimationFrame(go);
+  }
+  function colHTML(d, n) {
+    const k = key(d.dt), head = `<span class="c-day"><small>${t().days[d.dow]}</small><span class="num">${d.dt.getDate()}</span>${d.today ? `<span class="flag">${t().today}</span>` : ""}</span>`;
+    if (d.closed) return `<div class="col closed"><span class="c-head">${head}<span class="c-sum">${t().closed}</span></span></div>`;
+    const os = sortOs(dayOrders(d));
+    const sum = d.future ? "" : `<span class="c-sum"><b>${money0(os.reduce((x, o) => x + o.total, 0))}</b> · ${t().ordersN(os.length)}</span>`;
+    const cards = os.length ? os.map(o => { const st = statusIn(d, o, n); return `<span class="card ${st}${o.placed === freshKey ? " fresh" : ""}"><span class="c-time">${clock(o.sched || o.placed)}</span><span class="c-st">${stLabel(st, o)}</span><span class="c-name">${esc(o.name)}</span><span class="c-total">${money(o.total)}</span><span class="c-type">${t()[o.type]}</span></span>`; }).join("") : `<span class="c-empty">${d.future ? t().upcoming : t().noOrders}</span>`;
+    return `<button type="button" class="col${d.today ? " today" : ""}" data-k="${k}"><span class="c-head">${head}${sum}</span><span class="cards">${cards}</span><span class="c-open">${t().open}</span></button>`;
+  }
+  function renderZoom(view, days, n, opt) {
+    const i = days.findIndex(d => key(d.dt) === zoomKey), d = days[i];
+    if (!d) { zoomKey = null; renderOrders(); return; }
+    const os = sortOs(dayOrders(d)), pk = os.filter(o => o.type === "pickup");
+    const step = dir => { for (let j = i + dir; j >= 0 && j < 7; j += dir) if (!days[j].closed) return key(days[j].dt); return ""; };
+    const pv = step(-1), nx = step(1);
+    const title = (d.today ? t().today + ", " : t().daysLong[d.dow] + ", ") + t().date(d.dt);
+    view.innerHTML = `<div class="zoom">
+      <div class="zoom-head"><button type="button" class="back" data-back="1">${t().backWeek}</button><h2>${title}</h2>
+        <button type="button" class="arrow" data-go="${pv}" aria-label="${t().prevDay}"${pv ? "" : " disabled"}>‹</button>
+        <button type="button" class="arrow" data-go="${nx}" aria-label="${t().nextDay}"${nx ? "" : " disabled"}>›</button></div>
+      <div class="kpis hero">${kpi(t().dayOrders, os.length, "", false, ["z-n-" + zoomKey, "int"])}${kpi(t().daySales, money0(os.reduce((x, o) => x + o.total, 0)), "", false, ["z-s-" + zoomKey, "money0", os.reduce((x, o) => x + o.total, 0)])}${kpi(t().dayPickup + " / " + t().dayDelivery, pk.length + " / " + (os.length - pk.length), "")}</div>
+      <ul class="orders">${os.length ? os.map(o => { const st = statusIn(d, o, n); return `<li class="order${o.web ? " website-demo" : ""}"${o.web ? ` data-customer-order="${esc(o.id)}"` : ""}>
+        <span class="o-time">${clock(o.sched || o.placed)}</span>
+        <span class="o-who"><span class="o-name">${esc(o.name)}</span>${o.web ? `<span class="website-order-tag">Website demo</span>` : ""}<span class="o-type">${t()[o.type]}</span><span class="o-items">${esc(o.items.map(it => it.q + " " + nameOf(BY_ID[it.id])).join(", "))}</span>${o.web ? `<span class="o-customer-note">${esc(o.id)}${o.phone ? " · " + esc(o.phone) : ""}</span>${o.notes ? `<span class="o-customer-note">Note: ${esc(o.notes)}</span>` : ""}` : ""}</span>
+        <span class="o-total">${money(o.total)}</span><span class="status ${st}">${stLabel(st, o)}</span></li>`; }).join("") : `<li class="order"><span class="c-empty" style="grid-column:1/-1">${d.future ? t().upcoming : t().noOrders}</span></li>`}</ul>
+    </div>`;
+    const z = view.querySelector(".zoom");
+    [...z.children].forEach((c, i) => c.style.setProperty("--i", i)); index(z, ".order");
+    if (opt.anim) replay(z, opt.anim);
+    runCounters(z, !!opt.anim);
+  }
+  function kpi(label, value, note, red, c) {
+    const data = c ? ` data-id="${c[0]}" data-f="${c[1]}" data-v="${c[2] !== undefined ? c[2] : value}"` : "";
+    return `<div class="kpi"><span class="k-label">${label}</span><span class="k-value${red ? " red" : ""}"${data}>${value}</span><span class="k-note">${note}</span></div>`;
+  }
+
+  // ---------- Sales tab ----------
+  let wk = 0, selKey = null;
+  const mondayOf = d => { const x = new Date(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+  const firstMonday = (() => { const m = mondayOf(DAYS[0].dt); if (m < DAYS[0].dt) m.setDate(m.getDate() + 7); return m; })();
+  const maxBack = Math.round((mondayOf(day) - firstMonday) / 864e5 / 7);
+  function weekDays(off) {
+    const mon = mondayOf(day); mon.setDate(mon.getDate() - 7 * off);
+    return [...Array(7)].map((_, i) => { const dt = new Date(mon); dt.setDate(mon.getDate() + i); return BY_KEY[key(dt)] || { dt, dow: dt.getDay(), future: dt > day, orders: [] }; });
+  }
+  const total = list => list.reduce((s, o) => s + o.total, 0);
+
+  function renderSales(opt) {
+    opt = opt || {};
+    const days = weekDays(wk), prev = weekDays(wk + 1), cur = wk === 0, cut = now();
+    const ti = days.findIndex(d => d.today);
+    const curO = days.flatMap(d => d.orders);
+    const prevO = cur ? prev.slice(0, ti + 1).flatMap((d, i) => i === ti ? d.orders.filter(o => o.placed <= cut) : d.orders) : prev.flatMap(d => d.orders);
+    const s = total(curO), ps = total(prevO), dl = ps ? (s - ps) / ps : 0;
+    const dtxt = `<b class="${dl >= 0 ? "up" : "down"}">${dl >= 0 ? "▲" : "▼"} ${Math.abs(dl * 100).toFixed(0)}%</b>`;
+
+    document.getElementById("wkLabel").textContent = t().range(days[0].dt, days[6].dt);
+    document.getElementById("wkPrev").disabled = wk >= maxBack;
+    document.getElementById("wkNext").disabled = wk === 0;
+    const wkk = document.getElementById("weekKpis");
+    wkk.innerHTML =
+      kpi(cur ? t().wkSales : t().wkSalesPast, money0(s), cur ? t().vsSoFar(dtxt) : t().vsPrev(dtxt), false, ["w-s", "money0", s]) +
+      kpi(t().wkOrders, curO.length, "", false, ["w-n", "int"]) +
+      kpi(t().wkAvg, money(curO.length ? s / curO.length : 0), "", false, ["w-a", "money", curO.length ? s / curO.length : 0]);
+    runCounters(wkk, opt.fresh);
+
+    const vals = days.map(d => total(d.orders)), mx = Math.max(1, ...vals);
+    const bestI = vals.indexOf(Math.max(...days.map((d, i) => d.today ? -1 : vals[i])));
+    if (!selKey || !days.some(d => key(d.dt) === selKey && d.orders.length)) { const def = ti >= 0 ? days[ti] : days[bestI]; selKey = def ? key(def.dt) : null; }
+    document.getElementById("week").innerHTML = days.map((d, i) => {
+      const k = key(d.dt), head = `<span class="d-date"><small>${t().days[d.dow]}</small><span class="num">${d.dt.getDate()}</span></span>`;
+      if (d.closed || d.future || !d.orders.length) return `<button type="button" class="day${d.closed ? " closed" : ""}" disabled aria-pressed="false">${head}<span class="d-flag"></span><span class="d-off">${d.closed ? t().closed : t().upcoming}</span></button>`;
+      const flag = d.today ? t().today : (i === bestI ? t().bestDay : "");
+      return `<button type="button" class="day${i === bestI ? " topday" : ""}" data-k="${k}" aria-pressed="${k === selKey}">
+        ${head}<span class="d-flag">${flag}</span>
+        <span><span class="d-sales">${money0(vals[i])}</span><br><span class="d-meta">${t().ordersN(d.orders.length)}</span></span>
+        <span class="bar-area"><span class="bar" style="height:${Math.max(4, vals[i] / mx * 56)}px;--w:${Math.max(6, vals[i] / mx * 100)}%"></span></span>
+      </button>`;
+    }).join("");
+    const wkEl = document.getElementById("week");
+    [...wkEl.children].forEach((c, i) => c.style.setProperty("--i", i));
+    if (opt.bars) replay(wkEl, "enter");
+    drawCharts(days, prev, cur, curO, vals, bestI, opt);
+
+    const sd = days.find(d => key(d.dt) === selKey);
+    if (!sd) return;
+    const os = sd.orders, pk = os.filter(o => o.type === "pickup"), dv = os.filter(o => o.type === "delivery");
+    document.getElementById("dayTitle").textContent = sd.today ? t().today : t().daysLong[sd.dow] + ", " + t().date(sd.dt);
+    const row = (l, v, n) => `<div class="kpi"><span class="k-label">${l}</span><span class="k-value" style="font-size:32px">${v}</span>${n ? `<span class="k-note">${n}</span>` : ""}</div>`;
+    document.getElementById("dayNums").innerHTML = row(t().daySales, money0(total(os)), t().ordersN(os.length)) +
+      `<div class="kpis" style="grid-template-columns:1fr 1fr;gap:14px">${row(t().dayPickup, money0(total(pk)), t().ordersN(pk.length))}${row(t().dayDelivery, money0(total(dv)), t().ordersN(dv.length))}</div>`;
+    const tally = {};
+    os.forEach(o => o.items.forEach(it => { tally[it.id] = (tally[it.id] || 0) + it.q; }));
+    const bestEl = document.getElementById("best"), dn = document.getElementById("dayNums");
+    bestEl.innerHTML = Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 5)
+      .map(([id, q]) => `<li><span class="nm">${esc(nameOf(BY_ID[id]))}<small>${esc(altOf(BY_ID[id]))}</small></span><span class="v">${t().sold(q)}</span></li>`).join("");
+    index(bestEl, "li"); index(dn, ":scope > *");
+    if (opt.swap !== false) { replay(bestEl, "swap"); replay(dn, "swap"); }
+  }
+
+
+  // ---------- Sales charts ----------
+  let chartSig = "";
+  const hourLab = h => lang === "zh" ? (h % 12 || 12) + (h < 12 ? "上午" : "下午") : (h % 12 || 12) + (h < 12 ? " am" : " pm");
+  const hourShort = h => lang === "zh" ? String(h) : (h % 12 || 12) + (h < 12 ? "a" : "p");
+  function drawCharts(days, prev, cur, curO, vals, bestI, opt) {
+    const sig = wk + "|" + lang;
+    if (sig === chartSig && !opt.bars) { document.querySelectorAll("#dailyChart .dc").forEach(b => b.classList.toggle("sel", b.dataset.k === selKey)); return; }
+    chartSig = sig;
+    // 1. Sales by day, with the same weekday a week earlier as a pale bar behind
+    const pv = prev.map(d => total(d.orders)), mxAll = Math.max(1, ...vals, ...pv);
+    document.getElementById("dailyChart").innerHTML = `<div class="ch-head"><h3 class="sub-title">${t().cDaily}</h3><span class="legend"><i></i>${cur ? t().lgThis : t().lgThat}<i class="ghost-sw"></i>${cur ? t().lgLast : t().lgBefore}</span></div>
+      <div class="dc-grid">${days.map((d, i) => {
+        const on = !(d.closed || d.future || !d.orders.length), k = key(d.dt);
+        return `<button type="button" class="dc${k === selKey ? " sel" : ""}${i === bestI ? " topday" : ""}"${on ? ` data-k="${k}"` : " disabled"} style="--i:${i}"><span class="dc-val${on ? "" : " off"}">${on ? money0(vals[i]) : (d.closed ? t().closed : "")}</span><span class="dc-plot">${pv[i] ? `<span class="dc-last" style="height:${pv[i] / mxAll * 100}%"></span>` : ""}${on ? `<span class="dc-bar" style="height:${Math.max(2, vals[i] / mxAll * 100)}%"></span>` : ""}</span><span class="dc-lab">${t().days[d.dow]}</span></button>`;
+      }).join("")}</div>`;
+    // 2. Weekly trend, tap a dot to jump to that week
+    const nW = Math.min(maxBack, 9) + 1, wv = [];
+    for (let o = nW - 1; o >= 0; o--) { const ds = weekDays(o); wv.push({ o, v: total(ds.flatMap(d => d.orders)), dt: ds[0].dt }); }
+    const mxW = Math.max(1, ...wv.map(w => w.v)), X = i => nW > 1 ? i / (nW - 1) * 100 : 50, Y = v => 100 - (v / mxW * 78 + 8);
+    const pts = wv.map((w, i) => `${X(i).toFixed(2)},${Y(w.v).toFixed(2)}`);
+    document.getElementById("trendChart").innerHTML = `<div class="ch-head"><h3 class="sub-title">${t().cTrend(nW)}</h3><span class="legend">${t().tapWeek}</span></div>
+      <div class="tr-wrap"><div class="tr-plot"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path class="tr-area" d="M0,100 L${pts.join(" L")} L100,100 Z"/><path class="tr-line" d="M${pts.join(" L")}"/></svg>
+      ${wv.map((w, i) => `<button type="button" class="tr-dot${w.o === wk ? " sel" : ""}" data-o="${w.o}" style="left:${X(i)}%;top:${Y(w.v)}%" aria-label="${t().range(w.dt, new Date(w.dt.getTime() + 6 * 864e5))}: ${money0(w.v)}"><span class="tr-val">${money0(w.v)}</span></button>`).join("")}</div>
+      <div class="tr-labs">${wv.map((w, i) => ((nW - 1 - i) % 2 === 0 ? `<span class="tr-lab${w.o === wk ? " on" : ""}" style="left:${X(i)}%">${t().date(w.dt)}</span>` : "")).join("")}</div></div>`;
+    // 3. Busy times for the week
+    const hrs = Array(10).fill(0); curO.forEach(o => { const h = Math.floor(o.placed / 60); if (h >= 11 && h <= 20) hrs[h - 11]++; });
+    const mxH = Math.max(1, ...hrs), pk = hrs.indexOf(Math.max(...hrs));
+    document.getElementById("hoursChart").innerHTML = `<div class="ch-head"><h3 class="sub-title">${t().cHours}</h3></div><div class="hc-grid">${hrs.map((n, i) => `<div class="hc${i === pk && n ? " peak" : ""}" style="--i:${i}"><span class="hc-val">${n || ""}</span><span class="hc-plot"><span class="hc-bar" style="height:${n / mxH * 100}%"></span></span><span class="hc-lab">${hourShort(11 + i)}</span></div>`).join("")}</div><p class="ch-note">${t().peak(hourLab(11 + pk))}</p>`;
+    // 4. Pickup versus delivery
+    const pkS = total(curO.filter(o => o.type === "pickup")), dvS = total(curO.filter(o => o.type === "delivery")), tot = pkS + dvS || 1, pp = Math.round(pkS / tot * 100);
+    document.getElementById("splitChart").innerHTML = `<div class="ch-head"><h3 class="sub-title">${t().cSplit}</h3></div><div class="sp-bar"><i class="sp-a" style="width:${pkS / tot * 100}%"></i><i class="sp-b" style="width:${dvS / tot * 100}%"></i></div>
+      <div class="sp-leg"><div><span>${t().pickup}</span><b>${money0(pkS)}</b><small>${pp}%</small></div><div><span>${t().delivery}</span><b>${money0(dvS)}</b><small>${100 - pp}%</small></div></div><p class="ch-note">${t().splitNote}</p>`;
+  }
+
+
+  // ---------- Menu tab ----------
+  const CATS = SITE.categories.map(c => [c.id, c.character]);
+  const STATE_KEY = "mca-menu-state"; // the website reads this same key, so changes show up there straight away
+  function loadState() { try { const x = JSON.parse(localStorage.getItem(STATE_KEY) || "{}"); return { off: x.off || [], added: x.added || [] }; } catch (_) { return { off: [], added: [] }; } }
+  function saveState() { try { localStorage.setItem(STATE_KEY, JSON.stringify({ off: DISH.filter(d => d.off).map(d => d.id), added: DISH.filter(d => d.custom).map(d => ({ id: d.id, name: d.en, chinese: d.zh, price: d.price, cat: d.cat })) })); } catch (_) {} }
+  const PHOTO = { "chili-oil-splashed-noodles": "/images/chili-oil-noodles.webp", "cumin-lamb-roujiamo": "/images/cumin-lamb-roujiamo.webp", "xi-an-lamb-bread-soup": "/images/lamb-bread-soup.webp", "soup-dumplings-6": "/images/soup-dumplings.webp" };
+  const saved = loadState();
+  const DISH = saved.added.map(x => ({ id: x.id, en: x.name, zh: x.chinese || "", price: +x.price, cat: x.cat, off: saved.off.includes(x.id), photo: null, custom: true }))
+    .concat(MENU.map(m => ({ id: m.id, en: m.en, zh: m.zh, price: m.price, cat: m.cat, off: saved.off.includes(m.id), photo: PHOTO[m.id] || null })));
+  let mcat = "all", mq = "";
+  const ICON_CAM = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.4h6.8L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>';
+  const ICON_PEN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>';
+  const catLabel = c => t().cats[c];
+  function renderPills() {
+    const el = document.getElementById("pills");
+    el.innerHTML = `<button type="button" class="pill" data-c="all" aria-pressed="${mcat === "all"}"><span class="pi">${DISH.length}</span>${t().menuAll}</button>` +
+      CATS.filter(([c]) => DISH.some(d => d.cat === c)).map(([c, ch]) => `<button type="button" class="pill" data-c="${c}" aria-pressed="${mcat === c}"><span class="pi" lang="zh">${ch}</span>${catLabel(c)}<span class="pc">${DISH.filter(d => d.cat === c).length}</span></button>`).join("");
+  }
+  function renderSide() {
+    const off = DISH.filter(d => d.off), noPhoto = DISH.filter(d => !d.photo).length;
+    document.getElementById("menuSide").innerHTML = `<span class="k-label">${t().menuTitle}</span>
+      <div class="big"><span class="k-value">${DISH.length}</span><span>${t().menuOn}</span></div>
+      <div class="side-split"><div><b>${DISH.length - off.length}</b><span>${t().menuAvail}</span></div><div><b>${off.length}</b><span>${t().menuOut}</span></div></div>
+      <h4>${t().menuSoldNow}</h4>
+      ${off.length ? `<ul class="so-list">${off.map(d => `<li><span>${esc(lang === "zh" ? d.zh || d.en : d.en)}</span><button type="button" data-sw="${d.id}">${t().menuPutBack}</button></li>`).join("")}</ul>` : `<p>${t().menuAllOk}</p>`}
+      ${noPhoto ? `<div class="warn">${t().menuNoPhoto(noPhoto)}</div>` : ""}
+      <button type="button" class="cta" id="addDish">+ ${t().menuAdd}</button>
+      <p class="sync-note">${t().menuSync}</p><a class="site-link" href="/menu" target="_blank" rel="noopener">${t().menuSee}</a>`;
+  }
+  function dishHTML(d, j) {
+    const nm = lang === "zh" && d.zh ? d.zh : d.en, alt = lang === "zh" ? (d.zh ? d.en : "") : d.zh;
+    return `<article class="dish${d.off ? " off" : ""}" data-id="${d.id}" style="--j:${j}">
+      <label class="ph" data-ch="${CATS.find(c => c[0] === d.cat)[1]}" ${d.photo ? `style="background-image:url('${d.photo}')"` : ""}><input type="file" accept="image/*" data-photo="${d.id}" hidden>
+        ${d.photo ? `<span class="edit">${ICON_PEN}</span>` : `<span class="ph-in">${ICON_CAM}<span>${t().menuPhoto}</span></span>`}<span class="price">${money(d.price)}</span></label>
+      <div class="d-body"><span class="d-cat">${catLabel(d.cat)}</span><h4 class="d-name">${esc(nm)}</h4><span class="d-alt" lang="zh">${esc(alt || "")}</span>
+        <div class="d-foot"><button type="button" class="sw" role="switch" aria-checked="${!d.off}" aria-label="${esc(nm)}" data-sw="${d.id}"><i></i></button><span class="sw-l">${d.off ? t().menuSold : t().menuOnMenu}</span></div></div></article>`;
+  }
+  function renderGrid() {
+    const q = mq.trim().toLowerCase();
+    const list = DISH.filter(d => (mcat === "all" || d.cat === mcat) && (!q || (d.en + " " + d.zh).toLowerCase().includes(q)));
+    document.getElementById("dishGrid").innerHTML = list.length ? list.map(dishHTML).join("") : `<p class="m-empty">${t().menuNone}</p>`;
+  }
+  function renderMenu() {
+    document.getElementById("menuSearch").placeholder = t().menuFind;
+    document.getElementById("mTitle").textContent = t().mNew; document.getElementById("mName").textContent = t().mName; document.getElementById("mZh").textContent = t().mZh;
+    document.getElementById("mPrice").textContent = t().mPrice; document.getElementById("mCat").textContent = t().mCat; document.getElementById("mCancel").textContent = t().mCancel; document.getElementById("mSave").textContent = t().mSave;
+    document.getElementById("mCatSel").innerHTML = CATS.map(([c]) => `<option value="${c}">${catLabel(c)}</option>`).join("");
+    renderPills(); renderSide(); renderGrid();
+  }
+  const modal = document.getElementById("modal"), form = document.getElementById("dishForm");
+  const closeModal = () => { modal.hidden = true; };
+  document.getElementById("mCancel").addEventListener("click", closeModal);
+  modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const f = new FormData(form), en = String(f.get("en")).trim(); if (!en) return;
+    DISH.unshift({ id: "new-" + Date.now().toString(36), en, zh: String(f.get("zh") || "").trim(), price: Math.max(0, +f.get("price") || 0), cat: f.get("cat"), off: false, photo: null, custom: true }); saveState();
+    mcat = "all"; mq = ""; document.getElementById("menuSearch").value = ""; closeModal(); form.reset(); renderMenu(); toast(t().menuAdded(esc(en)));
+  });
+  document.getElementById("menuSearch").addEventListener("input", e => { mq = e.target.value; renderGrid(); });
+  function setOff(id, off) {
+    const d = DISH.find(x => x.id === id); if (!d) return; d.off = off; saveState();
+    const card = document.querySelector(`.dish[data-id="${id}"]`);
+    if (card) { card.classList.toggle("off", off); card.querySelector(".sw").setAttribute("aria-checked", !off); card.querySelector(".sw-l").textContent = off ? t().menuSold : t().menuOnMenu; }
+    renderSide(); toast((off ? t().menuOffToast : t().menuOnToast)(esc(lang === "zh" && d.zh ? d.zh : d.en)));
+  }
+  document.getElementById("menuRoot").addEventListener("click", e => {
+    const pl = e.target.closest(".pill"); if (pl) { mcat = pl.dataset.c; renderPills(); renderGrid(); return; }
+    const sw = e.target.closest("[data-sw]"); if (sw) { const d = DISH.find(x => x.id === sw.dataset.sw); if (d) setOff(d.id, !d.off); return; }
+    if (e.target.closest("#addDish")) { modal.hidden = false; form.elements.en.focus(); }
+  });
+  document.getElementById("menuRoot").addEventListener("change", e => {
+    const inp = e.target.closest("[data-photo]"); if (!inp || !inp.files[0]) return;
+    const d = DISH.find(x => x.id === inp.dataset.photo); d.photo = URL.createObjectURL(inp.files[0]);
+    const card = inp.closest(".dish"), ph = card.querySelector(".ph");
+    ph.style.backgroundImage = `url('${d.photo}')`; const pin = ph.querySelector(".ph-in"); if (pin) pin.outerHTML = `<span class="edit">${ICON_PEN}</span>`; renderSide();
+  });
+
+  // ---------- Website tab ----------
+  function renderSite() {
+    const wkN = DAYS.slice(NDAYS - 7).reduce((s, d) => s + d.orders.length, 0);
+    const visits = Math.round(wkN * 3.1 + rng(seed + 31)() * 60);
+    document.getElementById("siteKpis").innerHTML = kpi(t().sVisits, visits, t().vVisits) + kpi(t().sOrder, Math.round(visits * 0.31), t().vOrder) + kpi(t().sCall, Math.round(visits * 0.07), t().vCall);
+    document.getElementById("checklist").innerHTML = t().checks.map(c => `<li><span class="what">${c[0]}</span><span class="chip ${c[2] ? "soon" : "live"}">${c[2] ? t().soon : t().live}</span><span class="why">${c[1]}</span></li>`).join("");
+    const sk = document.getElementById("siteKpis");
+    sk.querySelectorAll(".k-value").forEach((el, i) => { el.dataset.id = "s" + i; el.dataset.v = el.textContent; el.dataset.f = "int"; });
+  }
+
+  function renderTop() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-t]").forEach(el => { el.textContent = t()[el.dataset.t]; });
+    document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+    moveThumb(document.getElementById("langSeg")); moveInk();
+    document.getElementById("today").textContent = t().daysLong[day.getDay()] + ", " + t().date(day) + " · " + clock(now());
+  }
+  function renderAll() { renderTop(); renderOrders(); renderSite(); renderMenu(); if (!document.getElementById("sales").hidden) renderSales({ swap: false }); }
+
+  // ---------- Events ----------
+  let lastZoom = null, busy = false;
+  document.getElementById("orderView").addEventListener("click", e => {
+    if (busy) return;
+    const w = e.target.closest("[data-owk]");
+    if (w && !w.disabled) { const d = +w.dataset.owk; owk += d; needScroll = true; renderOrders({ anim: d > 0 ? "from-l" : "from-r" }); return; }
+    if (e.target.closest("[data-back]")) {
+      window.scrollTo({ top: 0 });
+      const from = document.querySelector(".zoom").getBoundingClientRect();
+      zoomKey = null; needScroll = false;
+      renderOrders({ anim: "fade" });
+      const col = document.querySelector(`.col[data-k="${lastZoom}"]`); focusCol(col, true);
+      requestAnimationFrame(() => { if (col) { busy = true; morph(from, col.getBoundingClientRect(), null, () => { busy = false; }); } });
+      return;
+    }
+    const g = e.target.closest("[data-go]");
+    if (g && g.dataset.go) { const days = weekDays(owk).map(d => key(d.dt)); const dir = days.indexOf(g.dataset.go) > days.indexOf(zoomKey) ? "from-r" : "from-l"; zoomKey = lastZoom = g.dataset.go; renderOrders({ anim: dir }); return; }
+    const c = e.target.closest(".col[data-k]");
+    if (c) {
+      const y0 = window.scrollY, r = c.getBoundingClientRect(), clone = c.cloneNode(true);
+      clone.style.cssText = "border:0;transform:none;box-shadow:none;min-height:0;height:100%;animation:none";
+      zoomKey = lastZoom = c.dataset.k; window.scrollTo({ top: 0 });
+      const from = { top: r.top + (y0 - window.scrollY), left: r.left, width: r.width, height: r.height };
+      renderOrders({ anim: "enter" });
+      const z = document.querySelector(".zoom");
+      busy = true; morph(from, z.getBoundingClientRect(), clone, () => { busy = false; });
+    }
+  });
+  document.getElementById("week").addEventListener("click", e => { const b = e.target.closest(".day[data-k]"); if (!b || b.dataset.k === selKey) return; selKey = b.dataset.k; renderSales(); });
+  document.getElementById("chat").addEventListener("click", e => {
+    const button = e.target.closest("[data-chat]");
+    if (!button) return;
+    const reply = document.getElementById("chatReply");
+    reply.textContent = t()[button.dataset.chat];
+    reply.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "translateY(0)" }], { duration: reduced ? 1 : 220, easing: "cubic-bezier(.22,1,.36,1)" });
+  });
+  document.getElementById("dailyChart").addEventListener("click", e => { const b = e.target.closest(".dc[data-k]"); if (!b || b.dataset.k === selKey) return; selKey = b.dataset.k; renderSales(); });
+  document.getElementById("trendChart").addEventListener("click", e => { const b = e.target.closest(".tr-dot"); if (!b || +b.dataset.o === wk) return; wk = +b.dataset.o; selKey = null; renderSales({ bars: true }); });
+  document.getElementById("wkPrev").addEventListener("click", () => { if (wk < maxBack) { wk++; selKey = null; renderSales({ bars: true }); } });
+  document.getElementById("wkNext").addEventListener("click", () => { if (wk > 0) { wk--; selKey = null; renderSales({ bars: true }); } });
+  document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => {
+    if (b.dataset.lang === lang) return;
+    lang = b.dataset.lang; try { localStorage.setItem("mca-lang", lang); } catch (_) {}
+    document.querySelectorAll("[data-lang]").forEach(x => x.setAttribute("aria-pressed", x.dataset.lang === lang)); moveThumb(document.getElementById("langSeg"));
+    if (reduced) { renderAll(); return; }
+    document.body.classList.add("swapping");
+    setTimeout(() => { renderAll(); requestAnimationFrame(() => document.body.classList.remove("swapping")); }, 190);
+  }));
+  const tabs = [...document.querySelectorAll(".tab")];
+  let curTab = -1;
+  function show(id) {
+    const ni = tabs.findIndex(tb => tb.getAttribute("aria-controls") === id);
+    if (ni === curTab) return;
+    const dir = curTab < 0 ? "from-r" : ni > curTab ? "from-r" : "from-l";
+    tabs.forEach(tb => { const on = tb.getAttribute("aria-controls") === id; tb.setAttribute("aria-selected", on); tb.tabIndex = on ? 0 : -1; document.getElementById(tb.getAttribute("aria-controls")).hidden = !on; });
+    curTab = ni; moveInk();
+    const panel = document.getElementById(id);
+    if (id === "sales") renderSales({ fresh: true, bars: true, swap: false });
+    if (id === "orders") { renderOrders({ fresh: true, anim: zoomKey ? "enter" : (dir ? "" : "enter") }); }
+    if (id === "menu") renderMenu();
+    if (id === "site") runCounters(document.getElementById("siteKpis"), true);
+    if (id === "chat") window.mcaLive?.renderChat();
+    [...panel.children].forEach((c, i) => c.style.setProperty("--i", i));
+    replay(panel, "tab-swap", dir);
+  }
+  tabs.forEach((tb, i) => {
+    tb.addEventListener("click", () => show(tb.getAttribute("aria-controls")));
+    tb.addEventListener("keydown", e => { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; const nx = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length]; nx.focus(); show(nx.getAttribute("aria-controls")); });
+  });
+  window.addEventListener("scroll", () => document.querySelector(".top").classList.toggle("scrolled", window.scrollY > 4), { passive: true });
+  let latestCustomerId = readCustomerOrders()[0]?.id;
+  function refreshCustomerOrders() {
+    if (window.mcaLive?.mode !== "samples") { window.mcaLive?.refresh(); return; }
+    const latest = readCustomerOrders()[0];
+    if (latest) { owk = 0; zoomKey = BY_KEY[key(latest.date)] ? key(latest.date) : key(day); }
+    renderOrders();
+    if (latest && latest.id !== latestCustomerId) {
+      latestCustomerId = latest.id;
+      toast(`New website demo order from <b>${esc(latest.name)}</b>`);
+    }
+  }
+  window.addEventListener("storage", event => { if (DEMO_ORDER_KEYS.includes(event.key) || event.key === null) refreshCustomerOrders(); });
+  window.addEventListener("focus", refreshCustomerOrders);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshCustomerOrders(); });
+  window.addEventListener("resize", () => { moveInk(); moveThumb(document.getElementById("langSeg")); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { moveInk(); moveThumb(document.getElementById("langSeg")); });
+
+  // Refresh statuses and saved website orders; never inject fake incoming orders.
+  setInterval(() => {
+    document.getElementById("today").textContent = t().daysLong[day.getDay()] + ", " + t().date(day) + " · " + clock(now());
+    if (!busy && !document.getElementById("orders").hidden) renderOrders();
+  }, 10000);
+
+  const requestedCustomerOrder = readCustomerOrders().find(order => order.id === new URLSearchParams(location.search).get("order")) || readCustomerOrders()[0];
+  if (requestedCustomerOrder) {
+    const target = BY_KEY[key(requestedCustomerOrder.date)] || DAYS[DAYS.length - 1];
+    const weekStart = date => { const value = new Date(date); value.setDate(value.getDate() - (value.getDay() + 6) % 7); value.setHours(12, 0, 0, 0); return value; };
+    owk = Math.max(0, Math.min(maxBack, Math.round((weekStart(day) - weekStart(target.dt)) / 604800000)));
+    zoomKey = key(target.dt);
+  }
+  window.mcaRenderSamples = () => { renderOrders(); };
+  renderTop(); renderSite(); renderMenu();
+  const h = (location.hash || "").slice(1);
+  show(["orders", "sales", "menu", "reservations", "chat", "site"].includes(h) ? h : "orders");
+  if (requestedCustomerOrder && new URLSearchParams(location.search).has("order")) requestAnimationFrame(() => {
+    [...document.querySelectorAll("[data-customer-order]")].find(row => row.dataset.customerOrder === requestedCustomerOrder.id)?.scrollIntoView({ block: "center" });
+  });
+})();
+</script>
+<script src="./live.js" defer></script>
+
+</body>
+</html>

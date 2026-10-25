@@ -1,0 +1,287 @@
+{
+ "updated": "2026-09-30",
+ "categories": [
+  {
+   "id": "xian-specials",
+   "character": "西",
+   "title": "Xi'an specials",
+   "items": [
+    {
+     "name": "Chili oil-splashed noodles",
+     "chinese": "油泼面",
+     "spice": "SP",
+     "price": "From $10.99",
+     "description": "Wide hand-made noodles, chili, garlic, hot oil.",
+     "id": "chili-oil-splashed-noodles"
+    },
+    {
+     "name": "Liangpi cold noodles",
+     "chinese": "西安面皮",
+     "spice": "SP",
+     "price": "From $9.89",
+     "description": "Cold skin noodles in chili oil.",
+     "id": "liangpi-cold-noodles"
+    },
+    {
+     "name": "Cumin lamb roujiamo",
+     "chinese": "孜然羊肉肉夹馍",
+     "price": "From $9.99",
+     "description": "Wok-fried lamb with cumin in your choice of bun.",
+     "id": "cumin-lamb-roujiamo"
+    },
+    {
+     "name": "Braised pork roujiamo",
+     "chinese": "猪肉肉夹馍",
+     "price": "From $7.99",
+     "description": "Slow-braised pork in your choice of bun.",
+     "id": "braised-pork-roujiamo"
+    },
+    {
+     "name": "Spicy chicken roujiamo",
+     "chinese": "香辣鸡肉肉夹馍",
+     "spice": "SP",
+     "price": "From $8.99",
+     "description": "Spiced chicken in your choice of bun.",
+     "id": "spicy-chicken-roujiamo"
+    },
+    {
+     "name": "Xi'an lamb bread soup",
+     "chinese": "羊肉泡馍",
+     "price": "From $14.99",
+     "description": "Lamb broth, lamb, torn flatbread, sweet potato noodle, tofu skin, wood ear, lily flower.",
+     "id": "xi-an-lamb-bread-soup"
+    }
+   ]
+  },
+  {
+   "id": "noodles",
+   "character": "面",
+   "title": "Hand-made noodles",
+   "items": [
+    {
+     "name": "Beef noodle soup",
+     "chinese": "兰州牛肉面",
+     "price": "From $13.99",
+     "description": "Clear beef broth, beef shank, white radish, cilantro, scallion.",
+     "id": "beef-noodle-soup"
+    },
+    {
+     "name": "Braised beef noodle soup",
+     "chinese": "红烧牛肉面",
+     "spice": "SP3",
+     "price": "From $13.99",
+     "description": "Rich braised beef broth, braised beef, scallion.",
+     "id": "braised-beef-noodle-soup"
+    },
+    {
+     "name": "Spicy and sour beef noodle soup",
+     "chinese": "酸汤牛肉面",
+     "spice": "SP5",
+     "price": "From $13.99",
+     "description": "Spicy, sour beef broth, beef shank, Chinese pickles, cilantro.",
+     "id": "spicy-and-sour-beef-noodle-soup"
+    },
+    {
+     "name": "Chongqing noodle soup",
+     "chinese": "重庆小面",
+     "spice": "SP2",
+     "price": "From $13.99",
+     "description": "Spicy beef broth, fried ground pork, soybeans, garlic, peanuts, preserved pickle, sesame.",
+     "id": "chongqing-noodle-soup"
+    },
+    {
+     "name": "Lamb noodle soup",
+     "chinese": "滋补羊肉烩面",
+     "price": "From $13.99",
+     "description": "Rich lamb broth, lamb, sweet potato noodle, tofu skin, wood ear, lily flower.",
+     "id": "lamb-noodle-soup"
+    },
+    {
+     "name": "Braised chicken belt noodles",
+     "chinese": "大盘鸡裤带面",
+     "spice": "SP3",
+     "price": "From $13.99",
+     "description": "Wide belt noodles, braised chicken legs, greens.",
+     "id": "braised-chicken-belt-noodles"
+    },
+    {
+     "name": "Beijing zhajiang noodles",
+     "chinese": "老北京炸酱面",
+     "price": "From $12.99",
+     "description": "Brown pork sauce, sesame, fried egg, carrot, cucumber.",
+     "id": "beijing-zhajiang-noodles"
+    },
+    {
+     "name": "Tomato and egg knife-shaved noodles",
+     "chinese": "西红柿鸡蛋刀削面",
+     "price": "From $12.99",
+     "description": "Tomato and egg broth, preserved pickle, cucumber, scallion.",
+     "id": "tomato-and-egg-knife-shaved-noodles"
+    },
+    {
+     "name": "Dan dan noodles",
+     "chinese": "担担面",
+     "spice": "SP",
+     "price": "From $12.99",
+     "description": "Sweet and spicy sesame chili sauce, crushed peanuts optional.",
+     "id": "dan-dan-noodles"
+    },
+    {
+     "name": "Garlic noodles",
+     "chinese": "蒜香素拌面",
+     "price": "$11.99",
+     "description": "Tossed with garlic. No meat.",
+     "id": "garlic-noodles"
+    }
+   ]
+  },
+  {
+   "id": "small-plates",
+   "character": "菜",
+   "title": "Small plates",
+   "items": [
+    {
+     "name": "Garlic cucumber salad",
+     "chinese": "拍黄瓜",
+     "price": "From $5.49",
+     "description": "Smashed cucumber, garlic, soy, vinegar. Chili oil optional.",
+     "id": "garlic-cucumber-salad"
+    },
+    {
+     "name": "Black wood ear",
+     "chinese": "爽口木耳",
+     "price": "$5.99",
+     "description": "Wood ear, cilantro, onion, spiced dressing.",
+     "id": "black-wood-ear"
+    },
+    {
+     "name": "Spicy wonton soup",
+     "chinese": "红油抄手",
+     "spice": "SP",
+     "price": "$8.99",
+     "description": "Large pork wontons, preserved pickle, scallion, cilantro.",
+     "id": "spicy-wonton-soup"
+    },
+    {
+     "name": "Red chili wontons, 8",
+     "chinese": "红油抄手",
+     "spice": "SP",
+     "price": "From $9.99",
+     "description": "Pork wontons in red chili oil.",
+     "id": "red-chili-wontons-8"
+    },
+    {
+     "name": "Chicken egg rolls, 2",
+     "chinese": "鸡肉蛋卷",
+     "price": "$4.49",
+     "description": "Chicken and vegetables.",
+     "id": "chicken-egg-rolls-2"
+    }
+   ]
+  },
+  {
+   "id": "dim-sum",
+   "character": "点",
+   "title": "Dim sum and snacks",
+   "items": [
+    {
+     "name": "Soup dumplings, 6",
+     "chinese": "手工灌汤小笼包",
+     "price": "$10.99",
+     "description": "Hand-made pork soup dumplings. Made fresh, 10 to 15 minutes.",
+     "id": "soup-dumplings-6"
+    },
+    {
+     "name": "Crystal shrimp dumplings, 6",
+     "chinese": "水晶虾饺",
+     "price": "$7.99",
+     "description": "Made fresh, 10 to 15 minutes.",
+     "id": "crystal-shrimp-dumplings-6"
+    },
+    {
+     "name": "Beef dumplings",
+     "chinese": "牛肉蒸饺",
+     "price": "$9.99",
+     "description": "Ground beef, carrot, onion.",
+     "id": "beef-dumplings"
+    },
+    {
+     "name": "Jianbing",
+     "chinese": "煎饼果子",
+     "price": "From $6.99",
+     "description": "Chinese crepe, crispy cracker, preserved pickle, scallion, sweet sauce.",
+     "id": "jianbing"
+    },
+    {
+     "name": "Scallion pancake",
+     "chinese": "葱油饼",
+     "price": "$6.49",
+     "description": "Crisp, layered, green onion.",
+     "id": "scallion-pancake"
+    },
+    {
+     "name": "Shrimp spring rolls, 3",
+     "chinese": "虾春卷",
+     "price": "$4.99",
+     "id": "shrimp-spring-rolls-3"
+    },
+    {
+     "name": "Vegetable spring rolls, 3",
+     "chinese": "素春卷",
+     "price": "$3.99",
+     "id": "vegetable-spring-rolls-3"
+    },
+    {
+     "name": "Tea egg",
+     "chinese": "茶叶蛋",
+     "price": "$2.99",
+     "description": "Simmered in tea and spice.",
+     "id": "tea-egg"
+    },
+    {
+     "name": "House chili oil",
+     "chinese": "辣椒油",
+     "spice": "SP",
+     "price": "$6.99",
+     "description": "Our own, made in the kitchen.",
+     "id": "house-chili-oil"
+    }
+   ]
+  },
+  {
+   "id": "drinks",
+   "character": "饮",
+   "title": "Tea, boba and drinks",
+   "items": [
+    {
+     "name": "Hong Kong milk tea",
+     "chinese": "港式奶茶",
+     "price": "From $4.99",
+     "id": "hong-kong-milk-tea"
+    },
+    {
+     "name": "Taro ube latte",
+     "chinese": "芋头奶茶",
+     "price": "From $4.99",
+     "id": "taro-ube-latte"
+    },
+    {
+     "name": "Wintermelon green tea",
+     "chinese": "冬瓜绿茶",
+     "price": "From $4.99",
+     "id": "wintermelon-green-tea"
+    },
+    {
+     "name": "Mango smoothie",
+     "price": "From $5.99",
+     "id": "mango-smoothie"
+    },
+    {
+     "name": "Pink peach sparkling refresher",
+     "price": "From $5.99",
+     "id": "pink-peach-sparkling-refresher"
+    }
+   ]
+  }
+ ]
+}

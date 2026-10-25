@@ -1,0 +1,26 @@
+{
+  "buildCommand": "pnpm --filter @workspace/miss-chang-an run build",
+  "outputDirectory": "dist/public",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api"
+    },
+    {
+      "source": "/((?!api|dashboard|images|assets|favicon|robots|sitemap).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard/index.html",
+      "permanent": false
+    },
+    {
+      "source": "/dashboard/",
+      "destination": "/dashboard/index.html",
+      "permanent": false
+    }
+  ]
+}
