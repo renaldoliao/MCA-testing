@@ -105,7 +105,7 @@ body.swapping main, body.swapping .tabs { opacity: .72; }
 .demo-order-customer { font-weight: 800; }
 .demo-order-meta, .demo-order-items, .demo-order-notes { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 .demo-order-total { font-weight: 800; white-space: nowrap; text-align: right; }
-.order.website-demo { background: #fffaf0; border-left: 3px solid var(--red); padding-left: 14px; }
+.order.website-demo { background: none; }
 .website-order-tag { display: inline-block; margin-left: 8px; font-size: 10px; color: var(--red); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
 .o-customer-note { display: block; margin-top: 5px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
 @media (max-width: 640px) { .demo-order-card { grid-template-columns: 1fr auto; } .demo-order-items, .demo-order-notes { grid-column: 1/-1; } }
@@ -271,7 +271,9 @@ footer.site { border-top: 1px solid var(--line); padding-block: 18px 30px; color
   .kpi:first-child { grid-column: 1 / -1; }
   .order { grid-template-columns: 4.4em minmax(0, 1fr) auto; }
   .o-total { grid-column: 3; grid-row: 1; }
-  .status { grid-column: 2 / -1; grid-row: 2; justify-self: start; min-width: 0; }
+  .status, .o-state { grid-column: 2 / -1; grid-row: 2; justify-self: start; min-width: 0; }
+  .o-state { grid-auto-flow: column; align-items: center; }
+  .o-state .status { grid-column: auto; grid-row: auto; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
@@ -714,8 +716,9 @@ html { scroll-behavior: smooth; }
 .live-btn.red { background: var(--red); color: var(--bg); }
 .live-btn.red:hover { background: var(--ink); }
 #confirmedDemoOrders.demo-order-board { padding: 0; border: 0; background: none; box-shadow: none; }
-.o-advance { display: block; margin-top: 8px; border: 0; cursor: pointer; background: var(--ink); color: var(--bg); border-radius: 14px; padding: 6px 14px; font: inherit; font-size: 13px; font-weight: 700; transition: background-color .25s, transform .2s; }
-.o-advance:hover { background: var(--red); }
+.o-state { display: grid; gap: 6px; justify-items: stretch; }
+.o-advance { border: 1px solid var(--line); cursor: pointer; background: transparent; color: var(--ink); border-radius: 14px; padding: 4px 12px; font: inherit; font-size: 12px; font-weight: 700; white-space: nowrap; transition: background-color .25s, color .25s, border-color .25s, transform .2s; }
+.o-advance:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .o-advance:active { transform: scale(.96); }
 .o-advance:disabled { opacity: .5; cursor: default; }
 #chat .live-bar { margin-bottom: 18px; }
@@ -1242,8 +1245,8 @@ window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
       <div class="kpis hero">${kpi(t().dayOrders, os.length, "", false, ["z-n-" + zoomKey, "int"])}${kpi(t().daySales, money0(os.reduce((x, o) => x + o.total, 0)), "", false, ["z-s-" + zoomKey, "money0", os.reduce((x, o) => x + o.total, 0)])}${kpi(t().dayPickup + " / " + t().dayDelivery, pk.length + " / " + (os.length - pk.length), "")}</div>
       <ul class="orders">${os.length ? os.map(o => { const st = statusIn(d, o, n); return `<li class="order${o.web ? " website-demo" : ""}"${o.web ? ` data-customer-order="${esc(o.id)}"` : ""}>
         <span class="o-time">${clock(o.sched || o.placed)}</span>
-        <span class="o-who"><span class="o-name">${esc(o.name)}</span>${o.web ? `<span class="website-order-tag">Website demo</span>` : ""}<span class="o-type">${t()[o.type]}</span><span class="o-items">${esc(o.items.map(it => it.q + " " + nameOf(BY_ID[it.id])).join(", "))}</span>${o.web ? `<span class="o-customer-note">MCA-${esc(o.id.slice(0, 8).toUpperCase())}${o.phone ? " · " + esc(o.phone) : ""}</span>${o.notes ? `<span class="o-customer-note">Note: ${esc(o.notes)}</span>` : ""}${WEB_NEXT[o.customerStatus] ? `<button type="button" class="o-advance" data-advance="${esc(o.id)}" data-status="${WEB_NEXT[o.customerStatus][0]}">${WEB_NEXT[o.customerStatus][lang === "zh" ? 2 : 1]}</button>` : ""}` : ""}</span>
-        <span class="o-total">${money(o.total)}</span><span class="status ${st}">${stLabel(st, o)}</span></li>`; }).join("") : `<li class="order"><span class="c-empty" style="grid-column:1/-1">${d.future ? t().upcoming : t().noOrders}</span></li>`}</ul>
+        <span class="o-who"><span class="o-name">${esc(o.name)}</span>${o.web ? `<span class="website-order-tag">Website demo</span>` : ""}<span class="o-type">${t()[o.type]}</span><span class="o-items">${esc(o.items.map(it => it.q + " " + nameOf(BY_ID[it.id])).join(", "))}</span>${o.web ? `<span class="o-customer-note">MCA-${esc(o.id.slice(0, 8).toUpperCase())}${o.phone ? " · " + esc(o.phone) : ""}</span>${o.notes ? `<span class="o-customer-note">Note: ${esc(o.notes)}</span>` : ""}` : ""}</span>
+        <span class="o-total">${money(o.total)}</span>${o.web && WEB_NEXT[o.customerStatus] ? `<span class="o-state"><span class="status ${st}">${stLabel(st, o)}</span><button type="button" class="o-advance" data-advance="${esc(o.id)}" data-status="${WEB_NEXT[o.customerStatus][0]}">${WEB_NEXT[o.customerStatus][lang === "zh" ? 2 : 1]}</button></span>` : `<span class="status ${st}">${stLabel(st, o)}</span>`}</li>`; }).join("") : `<li class="order"><span class="c-empty" style="grid-column:1/-1">${d.future ? t().upcoming : t().noOrders}</span></li>`}</ul>
     </div>`;
     const z = view.querySelector(".zoom");
     [...z.children].forEach((c, i) => c.style.setProperty("--i", i)); index(z, ".order");
