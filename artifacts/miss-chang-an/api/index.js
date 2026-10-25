@@ -52122,7 +52122,15 @@ router.patch("/staff/orders/:id", async (req, res) => {
 });
 router.get("/staff/conversations", async (_req, res) => {
   const rows = await db.select({ id: conversations.id, createdAt: conversations.createdAt, updatedAt: conversations.updatedAt }).from(conversations).orderBy(desc(conversations.updatedAt)).limit(200);
-  res.json(rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString() })));
+  const latest = await db.execute(sql`SELECT DISTINCT ON (conversation_id) conversation_id, body, role FROM mca_messages ORDER BY conversation_id, created_at DESC`);
+  const last = new Map(latest.rows.map((row) => [row.conversation_id, row]));
+  res.json(rows.map((row) => ({
+    ...row,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    lastMessage: last.get(row.id)?.body.slice(0, 120) ?? "",
+    lastRole: last.get(row.id)?.role ?? ""
+  })));
 });
 router.use("/staff/conversations/:id/messages", async (req, res, next) => {
   const id = String(req.params.id);

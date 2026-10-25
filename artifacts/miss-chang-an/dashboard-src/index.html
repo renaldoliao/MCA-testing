@@ -695,6 +695,40 @@ html { scroll-behavior: smooth; }
     scroll-behavior: auto !important;
   }
 }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* Live website orders and chat (live.js), drawn in the dashboard's own style */
+.live-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 12px 14px 12px 18px; border: 1px solid var(--line); border-radius: 16px; background: #fffaf2; }
+.live-bar p { margin: 0; color: var(--muted); font-size: 14px; display: inline-flex; align-items: center; gap: 9px; }
+.live-bar p b { color: var(--ink); }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.live-bar.on .live-dot { background: #2f8a4c; animation: pulse 1.8s infinite; }
+.live-bar.err .live-dot { background: var(--red); }
+.live-btn { border: 0; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; background: var(--soft); color: var(--ink); border-radius: 14px; padding: 7px 14px; font-weight: 700; font-size: 14px; transition: background-color .25s, color .25s; }
+.live-btn:hover { background: var(--ink); color: var(--bg); }
+.live-btn.red { background: var(--red); color: var(--bg); }
+.live-btn.red:hover { background: var(--ink); }
+#confirmedDemoOrders.demo-order-board { padding: 0; border: 0; background: none; box-shadow: none; }
+.o-advance { display: block; margin-top: 8px; border: 0; cursor: pointer; background: var(--ink); color: var(--bg); border-radius: 14px; padding: 6px 14px; font: inherit; font-size: 13px; font-weight: 700; transition: background-color .25s, transform .2s; }
+.o-advance:hover { background: var(--red); }
+.o-advance:active { transform: scale(.96); }
+.o-advance:disabled { opacity: .5; cursor: default; }
+#chat .live-bar { margin-bottom: 18px; }
+.live-chat .chat-thread { max-height: 52vh; overflow-y: auto; align-content: start; min-height: 140px; }
+.live-chat .chat-bubble small { display: block; font-size: 11px; font-weight: 700; opacity: .65; margin-bottom: 3px; }
+.live-chat .chat-answer { justify-self: end; border-radius: 16px 16px 4px 16px; }
+.live-chat .chat-empty { margin: auto; color: var(--muted); font-size: 14px; }
+.live-reply { display: grid; gap: 10px; }
+.live-reply textarea { width: 100%; box-sizing: border-box; font: inherit; color: var(--ink); padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: #fffaf2; resize: vertical; min-height: 84px; }
+.live-reply textarea:focus { outline: 2px solid var(--red); outline-offset: 1px; }
+.live-reply .cta { justify-self: start; padding: 12px 22px; font-size: 15px; }
+.live-reply .cta:disabled { opacity: .6; cursor: default; transform: none; }
+.live-chat .chat-quick button { display: grid; gap: 3px; }
+.live-chat .chat-quick button span { font-weight: 600; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.live-chat .chat-quick button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.live-chat .chat-quick button[aria-pressed="true"] span { color: rgba(247,239,226,.7); }
+.live-chat .chat-quick p { margin: 0; color: var(--muted); font-size: 14px; }
+.needs-reply { justify-self: start; font-style: normal; font-size: 11px; font-weight: 800; color: var(--bg); background: var(--red); border-radius: 10px; padding: 2px 8px; }
 </style>
 
 <header class="top">
@@ -822,6 +856,7 @@ html { scroll-behavior: smooth; }
 <div class="foot"><div class="wrap"><footer class="site"><span>Miss Chang An 念长安 · 5071 Rochester Rd, Troy · (313) 825-7757</span><span>Built by Studio 1801</span></footer></div></div>
 
 <script>
+window.mcaServerOrders = window.mcaServerOrders || []; // filled by live.js
 (function () {
   const T = {
     en: {
@@ -965,9 +1000,10 @@ html { scroll-behavior: smooth; }
   const DEMO_ORDER_KEYS = [DEMO_ORDERS_KEY, "mca-orders"];
   function readCustomerOrders() {
     const found = new Map();
-    for (const storageKey of DEMO_ORDER_KEYS) {
+    // Live website orders (from the shared database) replace this-browser-only demo orders.
+    const sources = Array.isArray(window.mcaServerOrders) ? [window.mcaServerOrders] : DEMO_ORDER_KEYS.map(storageKey => { try { return JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch (_) { return []; } });
+    for (const parsed of sources) {
       try {
-        const parsed = JSON.parse(localStorage.getItem(storageKey) || "[]");
         if (!Array.isArray(parsed)) continue;
         for (const row of parsed) {
           if (!row || typeof row.id !== "string" || typeof row.name !== "string" || found.has(row.id)) continue;
@@ -1000,7 +1036,7 @@ html { scroll-behavior: smooth; }
     }
   }
   function renderConfirmedDemoOrders() {
-    if (window.mcaLive) { window.mcaLive.renderOrders(); return; }
+    if (window.mcaLive) { window.mcaLive.renderBar(); return; }
     const board = document.getElementById("confirmedDemoOrders");
     if (!board) return;
     const customerOrders = readCustomerOrders();
@@ -1116,7 +1152,7 @@ html { scroll-behavior: smooth; }
   // Status is worked out from the clock, nobody has to tap anything
   function statusIn(d, o, n) { return o.web || d.today ? statusOf(o, n) : d.future ? "later" : "done"; }
   function statusOf(o, n) {
-    if (o.web) return o.customerStatus === "Picked up" || o.customerStatus === "done" ? "done" : "wait";
+    if (o.web) return o.customerStatus === "Picked up" || o.customerStatus === "done" || o.customerStatus === "complete" ? "done" : "wait";
     const readyBy = o.sched ? o.sched : o.placed + o.doneAfter;
     if (o.sched && n < o.sched - 20) return "later";
     if (n < readyBy) return "wait";
@@ -1126,10 +1162,11 @@ html { scroll-behavior: smooth; }
   // ---------- Orders tab ----------
   let owk = 0, zoomKey = readCustomerOrders().length ? key(day) : null, freshKey = null, needScroll = true;
   const dayOrders = d => d.future ? (FUTURE[key(d.dt)] || []) : d.orders;
-  const stLabel = (st, o) => o.web && st === "wait" ? (lang === "zh" ? "新订单" : "New") : st === "later" ? t().st.later(clock(o.sched)) : st === "wait" ? t().st.wait : (o.type === "pickup" ? t().st.pickedUp : t().st.delivered);
+  const WEB_ST = { new: ["New", "新订单"], preparing: ["Preparing", "准备中"], ready: ["Ready", "待取餐"] };
+  const WEB_NEXT = { new: ["preparing", "Mark preparing", "开始准备"], preparing: ["ready", "Mark ready", "标记待取"], ready: ["complete", "Mark picked up", "标记已取"] };
+  const stLabel = (st, o) => o.web && st === "wait" ? (WEB_ST[o.customerStatus] || WEB_ST.new)[lang === "zh" ? 1 : 0] : st === "later" ? t().st.later(clock(o.sched)) : st === "wait" ? t().st.wait : (o.type === "pickup" ? t().st.pickedUp : t().st.delivered);
   const sortOs = list => list.slice().sort((x, y) => Number(!!y.web) - Number(!!x.web) || (x.web && y.web ? y.createdAt - x.createdAt : (x.sched || x.placed) - (y.sched || y.placed)));
   function renderOrders(opt) {
-    if (window.mcaLive?.mode !== "samples") { window.mcaLive?.renderOrders(); return; }
     opt = opt || {};
     syncCustomerOrders();
     renderConfirmedDemoOrders();
@@ -1193,7 +1230,7 @@ html { scroll-behavior: smooth; }
       <div class="kpis hero">${kpi(t().dayOrders, os.length, "", false, ["z-n-" + zoomKey, "int"])}${kpi(t().daySales, money0(os.reduce((x, o) => x + o.total, 0)), "", false, ["z-s-" + zoomKey, "money0", os.reduce((x, o) => x + o.total, 0)])}${kpi(t().dayPickup + " / " + t().dayDelivery, pk.length + " / " + (os.length - pk.length), "")}</div>
       <ul class="orders">${os.length ? os.map(o => { const st = statusIn(d, o, n); return `<li class="order${o.web ? " website-demo" : ""}"${o.web ? ` data-customer-order="${esc(o.id)}"` : ""}>
         <span class="o-time">${clock(o.sched || o.placed)}</span>
-        <span class="o-who"><span class="o-name">${esc(o.name)}</span>${o.web ? `<span class="website-order-tag">Website demo</span>` : ""}<span class="o-type">${t()[o.type]}</span><span class="o-items">${esc(o.items.map(it => it.q + " " + nameOf(BY_ID[it.id])).join(", "))}</span>${o.web ? `<span class="o-customer-note">${esc(o.id)}${o.phone ? " · " + esc(o.phone) : ""}</span>${o.notes ? `<span class="o-customer-note">Note: ${esc(o.notes)}</span>` : ""}` : ""}</span>
+        <span class="o-who"><span class="o-name">${esc(o.name)}</span>${o.web ? `<span class="website-order-tag">Website demo</span>` : ""}<span class="o-type">${t()[o.type]}</span><span class="o-items">${esc(o.items.map(it => it.q + " " + nameOf(BY_ID[it.id])).join(", "))}</span>${o.web ? `<span class="o-customer-note">MCA-${esc(o.id.slice(0, 8).toUpperCase())}${o.phone ? " · " + esc(o.phone) : ""}</span>${o.notes ? `<span class="o-customer-note">Note: ${esc(o.notes)}</span>` : ""}${WEB_NEXT[o.customerStatus] ? `<button type="button" class="o-advance" data-advance="${esc(o.id)}" data-status="${WEB_NEXT[o.customerStatus][0]}">${WEB_NEXT[o.customerStatus][lang === "zh" ? 2 : 1]}</button>` : ""}` : ""}</span>
         <span class="o-total">${money(o.total)}</span><span class="status ${st}">${stLabel(st, o)}</span></li>`; }).join("") : `<li class="order"><span class="c-empty" style="grid-column:1/-1">${d.future ? t().upcoming : t().noOrders}</span></li>`}</ul>
     </div>`;
     const z = view.querySelector(".zoom");
@@ -1476,7 +1513,7 @@ html { scroll-behavior: smooth; }
   window.addEventListener("scroll", () => document.querySelector(".top").classList.toggle("scrolled", window.scrollY > 4), { passive: true });
   let latestCustomerId = readCustomerOrders()[0]?.id;
   function refreshCustomerOrders() {
-    if (window.mcaLive?.mode !== "samples") { window.mcaLive?.refresh(); return; }
+    if (window.mcaLive) { window.mcaLive.refresh(); return; }
     const latest = readCustomerOrders()[0];
     if (latest) { owk = 0; zoomKey = BY_KEY[key(latest.date)] ? key(latest.date) : key(day); }
     renderOrders();
@@ -1505,6 +1542,8 @@ html { scroll-behavior: smooth; }
     zoomKey = key(target.dt);
   }
   window.mcaRenderSamples = () => { renderOrders(); };
+  window.mcaToast = html => toast(html);
+  window.mcaLang = () => lang;
   renderTop(); renderSite(); renderMenu();
   const h = (location.hash || "").slice(1);
   show(["orders", "sales", "menu", "reservations", "chat", "site"].includes(h) ? h : "orders");
